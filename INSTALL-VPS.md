@@ -165,26 +165,32 @@ ufw status
 
 ## 6. Caricamento del codice
 
-### Opzione A — Da repository Git (consigliata)
+### Opzione A — PowerShell nativo (scp, zero installazioni)
 
-```bash
-cd /opt
-git clone <URL_DEL_TUO_REPO> beach
-cd /opt/beach
+```powershell
+# Esegui da PowerShell nella directory C:\CMP\Personal\beach
+
+# 1. Copia tutto il progetto sulla VPS
+scp -r C:\CMP\Personal\beach root@80.211.137.54:/opt/
+
+# 2. Connettiti alla VPS e rimuovi le cartelle di build (se presenti)
+ssh root@80.211.137.54 "find /opt/beach -name 'node_modules' -type d -prune -exec rm -rf {} + ; find /opt/beach -name 'target' -type d -prune -exec rm -rf {} + ; echo 'Pulizia completata'"
 ```
 
-### Opzione B — Upload da locale via rsync
+### Opzione B — Git Bash (se hai Git for Windows installato)
 
-Esegui dal tuo PC (non dalla VPS):
+Apri **Git Bash** (non PowerShell) e lancia il comando in una sola riga:
 
 ```bash
-rsync -avz \
-  --exclude='.git' \
-  --exclude='node_modules' \
-  --exclude='target' \
-  --exclude='.env' \
-  /percorso/locale/beach/ \
-  root@80.211.137.54:/opt/beach/
+rsync -avz --exclude='.git' --exclude='node_modules' --exclude='target' --exclude='.env' /c/CMP/Personal/beach/ root@80.211.137.54:/opt/beach/
+```
+
+### Opzione C — WSL (se hai Windows Subsystem for Linux)
+
+Apri il terminale WSL e lancia:
+
+```bash
+rsync -avz --exclude='.git' --exclude='node_modules' --exclude='target' --exclude='.env' /mnt/c/CMP/Personal/beach/ root@80.211.137.54:/opt/beach/
 ```
 
 ### Verifica struttura
