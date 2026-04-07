@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beach Platform — La tua estate digitale</title>
+  <meta name="description" content="Prenota il tuo ombrellone e ordina cibo e bevande direttamente sulla spiaggia. La piattaforma digitale completa per il tuo stabilimento balneare." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sea:      #0077b6;
+      --sea-dark: #023e8a;
+      --sea-mid:  #0096c7;
+      --foam:     #90e0ef;
+      --sand:     #fdf0d5;
+      --sand-dark:#f4c97c;
+      --sun:      #f9c74f;
+      --coral:    #f94144;
+      --text:     #1a1a2e;
+      --muted:    #5a6a7e;
+      --white:    #ffffff;
+      --radius:   1.25rem;
+      --shadow:   0 8px 40px rgba(0,119,182,.18);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── NAVBAR ─────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .9rem 2rem;
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0,119,182,.1);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: .55rem;
+      font-weight: 800; font-size: 1.15rem; color: var(--sea-dark);
+      text-decoration: none;
+    }
+    .nav-logo svg { width: 32px; height: 32px; }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      text-decoration: none; font-size: .92rem; font-weight: 500; color: var(--muted);
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--sea); }
+
+    /* ── HERO ───────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--sea-dark) 0%, var(--sea-mid) 50%, var(--foam) 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 7rem 1.5rem 10rem;
+      position: relative; overflow: hidden;
+    }
+
+    /* Floating bubbles */
+    .bubbles { position: absolute; inset: 0; pointer-events: none; }
+    .bubble {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      animation: rise linear infinite;
+    }
+    @keyframes rise {
+      0%   { transform: translateY(100vh) scale(.5); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: .6; }
+      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(255,255,255,.18); color: var(--white);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 2rem; padding: .35rem 1rem;
+      font-size: .82rem; font-weight: 600; letter-spacing: .05em;
+      text-transform: uppercase; margin-bottom: 1.8rem;
+      backdrop-filter: blur(6px);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      font-weight: 900; color: var(--white);
+      line-height: 1.1; margin-bottom: 1.4rem;
+      text-shadow: 0 2px 20px rgba(0,0,0,.2);
+    }
+    .hero h1 span {
+      background: linear-gradient(90deg, var(--sun), var(--sand-dark));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 560px; font-size: 1.15rem; color: rgba(255,255,255,.88);
+      line-height: 1.7; margin-bottom: 2.5rem;
+    }
+
+    .hero-ctas {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .85rem 2rem; border-radius: 3rem;
+      font-size: 1rem; font-weight: 700; text-decoration: none;
+      transition: transform .18s, box-shadow .18s;
+      cursor: pointer; border: none;
+    }
+    .btn:hover { transform: translateY(-3px); }
+    .btn-primary {
+      background: var(--white); color: var(--sea-dark);
+      box-shadow: 0 4px 24px rgba(0,0,0,.18);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 32px rgba(0,0,0,.24); }
+    .btn-outline {
+      background: transparent; color: var(--white);
+      border: 2px solid rgba(255,255,255,.5);
+      backdrop-filter: blur(4px);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,.15); }
+
+    /* Wave separator */
+    .wave {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      line-height: 0; overflow: hidden;
+    }
+    .wave svg { display: block; width: 100%; }
+
+    /* ── STATS BAR ──────────────────────────────────────────── */
+    .stats {
+      background: var(--white);
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 0;
+      box-shadow: var(--shadow);
+    }
+    .stat {
+      flex: 1; min-width: 160px; max-width: 260px;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 2rem 1.5rem;
+      border-right: 1px solid #f0f4f8;
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-size: 2.2rem; font-weight: 900; color: var(--sea);
+      line-height: 1;
+    }
+    .stat-label { font-size: .84rem; color: var(--muted); margin-top: .4rem; }
+
+    /* ── SECTION SHARED ─────────────────────────────────────── */
+    section { padding: 6rem 1.5rem; }
+    .section-label {
+      display: inline-block;
+      font-size: .78rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--sea); margin-bottom: .8rem;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 800; line-height: 1.15; margin-bottom: 1rem;
+    }
+    .section-sub {
+      font-size: 1.05rem; color: var(--muted);
+      max-width: 560px; line-height: 1.7; margin-bottom: 3rem;
+    }
+    .container { max-width: 1160px; margin: 0 auto; }
+
+    /* ── APPS SECTION ───────────────────────────────────────── */
+    .apps-section { background: #f7fbff; }
+    .apps-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+      gap: 2rem;
+    }
+
+    /* ── APP CARD ───────────────────────────────────────────── */
+    .app-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: transform .22s, box-shadow .22s;
+    }
+    .app-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,119,182,.22); }
+
+    .app-card-header {
+      padding: 2.5rem 2.5rem 2rem;
+      position: relative; overflow: hidden;
+    }
+    .card-booking .app-card-header {
+      background: linear-gradient(135deg, var(--sea-dark) 0%, var(--sea-mid) 100%);
+    }
+    .card-delivery .app-card-header {
+      background: linear-gradient(135deg, #d62828 0%, #f77f00 100%);
+    }
+
+    /* Decorative circles in header */
+    .app-card-header::before, .app-card-header::after {
+      content: ''; position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,.07);
+    }
+    .app-card-header::before { width: 200px; height: 200px; right: -60px; top: -60px; }
+    .app-card-header::after  { width: 120px; height: 120px; right: 40px; bottom: -40px; }
+
+    .app-icon {
+      width: 64px; height: 64px;
+      background: rgba(255,255,255,.18);
+      border-radius: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.2rem; backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,.25);
+      position: relative; z-index: 1;
+    }
+    .app-icon svg { width: 34px; height: 34px; }
+
+    .app-tag {
+      display: inline-block;
+      background: rgba(255,255,255,.2);
+      color: rgba(255,255,255,.95);
+      border-radius: 2rem; padding: .2rem .75rem;
+      font-size: .74rem; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; margin-bottom: .75rem;
+      position: relative; z-index: 1;
+    }
+    .app-card-header h2 {
+      font-size: 1.65rem; font-weight: 800; color: var(--white);
+      line-height: 1.2; margin-bottom: .5rem;
+      position: relative; z-index: 1;
+    }
+    .app-card-header p {
+      font-size: .97rem; color: rgba(255,255,255,.85);
+      line-height: 1.6; position: relative; z-index: 1;
+    }
+
+    .app-card-body { padding: 2rem 2.5rem; flex: 1; }
+
+    .feature-list {
+      list-style: none; display: flex; flex-direction: column; gap: .75rem;
+      margin-bottom: 2rem;
+    }
+    .feature-list li {
+      display: flex; align-items: flex-start; gap: .75rem;
+      font-size: .95rem; line-height: 1.5; color: var(--text);
+    }
+    .feature-icon {
+      flex-shrink: 0; width: 28px; height: 28px; border-radius: .55rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .95rem; margin-top: .05rem;
+    }
+    .card-booking .feature-icon { background: #e0f4ff; }
+    .card-delivery .feature-icon { background: #fff0e8; }
+
+    .app-card-footer {
+      padding: 0 2.5rem 2.5rem;
+      display: flex; gap: 1rem; flex-wrap: wrap;
+    }
+    .btn-card {
+      flex: 1; min-width: 140px; justify-content: center;
+      padding: .85rem 1.5rem; border-radius: .85rem; font-size: .97rem;
+    }
+    .card-booking .btn-card-main { background: var(--sea); color: var(--white); }
+    .card-booking .btn-card-main:hover { background: var(--sea-dark); }
+    .card-delivery .btn-card-main { background: #f77f00; color: var(--white); }
+    .card-delivery .btn-card-main:hover { background: #d62828; }
+    .btn-card-secondary {
+      background: #f0f6ff; color: var(--sea-dark);
+      border: 1px solid #d8eaf8;
+    }
+    .btn-card-secondary:hover { background: #e0eeff; }
+
+    /* ── HOW IT WORKS ───────────────────────────────────────── */
+    .how-section { background: var(--white); }
+    .how-tabs {
+      display: flex; gap: .5rem; margin-bottom: 3rem;
+      background: #f0f6ff; padding: .4rem;
+      border-radius: .85rem; width: fit-content;
+    }
+    .how-tab {
+      padding: .6rem 1.4rem; border-radius: .65rem;
+      font-size: .92rem; font-weight: 600; cursor: pointer;
+      border: none; background: transparent; color: var(--muted);
+      transition: background .18s, color .18s;
+    }
+    .how-tab.active { background: var(--white); color: var(--sea-dark); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+    .how-content { display: none; }
+    .how-content.active { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+
+    .step-card {
+      background: #f7fbff;
+      border-radius: var(--radius); padding: 1.8rem;
+      position: relative; overflow: hidden;
+    }
+    .step-num {
+      font-size: 4rem; font-weight: 900; line-height: 1;
+      color: #ddeeff; position: absolute; top: .5rem; right: 1rem;
+      user-select: none;
+    }
+    .step-icon {
+      font-size: 1.8rem; margin-bottom: 1rem;
+    }
+    .step-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .5rem; }
+    .step-card p { font-size: .88rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── TECH SECTION ───────────────────────────────────────── */
+    .tech-section {
+      background: linear-gradient(135deg, var(--sea-dark), var(--sea));
+      color: var(--white);
+    }
+    .tech-section .section-label { color: var(--foam); }
+    .tech-section .section-title { color: var(--white); }
+    .tech-section .section-sub { color: rgba(255,255,255,.75); max-width: 100%; }
+    .tech-pills {
+      display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem;
+    }
+    .pill {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      color: var(--white); border-radius: 2rem;
+      padding: .4rem 1rem; font-size: .87rem; font-weight: 500;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ── CTA SECTION ────────────────────────────────────────── */
+    .cta-section {
+      background: var(--sand);
+      text-align: center;
+    }
+    .cta-section .section-title { max-width: 600px; margin: 0 auto 1rem; }
+    .cta-section .section-sub   { margin: 0 auto 2.5rem; }
+    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-cta-booking {
+      background: var(--sea); color: var(--white);
+      box-shadow: 0 4px 24px rgba(0,119,182,.35);
+    }
+    .btn-cta-booking:hover { background: var(--sea-dark); }
+    .btn-cta-delivery {
+      background: #f77f00; color: var(--white);
+      box-shadow: 0 4px 24px rgba(247,127,0,.35);
+    }
+    .btn-cta-delivery:hover { background: #d62828; }
+
+    /* ── FOOTER ─────────────────────────────────────────────── */
+    footer {
+      background: var(--text);
+      color: rgba(255,255,255,.6);
+      padding: 2.5rem 1.5rem;
+      text-align: center; font-size: .87rem;
+    }
+    footer strong { color: rgba(255,255,255,.9); }
+    footer .footer-links {
+      display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
+      margin-top: .8rem;
+    }
+    footer a { color: rgba(255,255,255,.5); text-decoration: none; transition: color .2s; }
+    footer a:hover { color: var(--foam); }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      nav { padding: .8rem 1.2rem; }
+      .nav-links { gap: 1rem; }
+      .apps-grid { grid-template-columns: 1fr; }
+      .app-card-header, .app-card-body, .app-card-footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .stat { padding: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ─────────────────────────────────────────────────── -->
+<nav>
+  <a href="#" class="nav-logo">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="20" fill="#0096c7"/>
+      <!-- umbrella -->
+      <path d="M20 8 C12 8 8 14 8 20 H20 H32 C32 14 28 8 20 8Z" fill="white" opacity=".9"/>
+      <rect x="19.5" y="20" width="1" height="12" rx=".5" fill="white" opacity=".9"/>
+      <path d="M19.5 32 Q17 35 19 35.5 Q21 36 20.5 32" fill="white" opacity=".7"/>
+      <!-- wave -->
+      <path d="M6 28 Q10 25 14 28 Q18 31 22 28 Q26 25 34 28" stroke="#90e0ef" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    </svg>
+    Beach Platform
+  </a>
+  <div class="nav-links">
+    <a href="#apps">Le App</a>
+    <a href="#how">Come funziona</a>
+    <a href="#tech">Tech</a>
+  </div>
+</nav>
+
+<!-- ── HERO ──────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="bubbles" id="bubbles"></div>
+
+  <div class="hero-badge">
+    🌊 La piattaforma digitale per la spiaggia
+  </div>
+
+  <h1>La tua estate,<br><span>senza file d'attesa</span></h1>
+
+  <p>
+    Prenota il tuo ombrellone in anticipo e ordina cibo e bevande
+    direttamente al tuo posto. Due app pensate per rendere ogni
+    giornata al mare perfetta.
+  </p>
+
+  <div class="hero-ctas">
+    <a href="https://booking.80-211-137-54.sslip.io" class="btn btn-primary" target="_blank">
+      ⛱ Prenota ombrellone
+    </a>
+    <a href="https://delivery.80-211-137-54.sslip.io" class="btn btn-outline" target="_blank">
+      🍹 Ordina in spiaggia
+    </a>
+  </div>
+
+  <div class="wave">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80">
+      <path fill="#f7fbff" fill-opacity="1"
+        d="M0,40 C180,80 360,0 540,40 C720,80 900,0 1080,40 C1260,80 1380,20 1440,40 L1440,80 L0,80 Z"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ── STATS BAR ──────────────────────────────────────────────── -->
+<div class="stats">
+  <div class="stat">
+    <span class="stat-num">2</span>
+    <span class="stat-label">Applicazioni integrate</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">100%</span>
+    <span class="stat-label">Digitale e senza carta</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">IT / EN</span>
+    <span class="stat-label">Multilingua</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">24/7</span>
+    <span class="stat-label">Disponibile sempre</span>
+  </div>
+</div>
+
+<!-- ── APPS SECTION ───────────────────────────────────────────── -->
+<section class="apps-section" id="apps">
+  <div class="container">
+    <span class="section-label">Le nostre applicazioni</span>
+    <h2 class="section-title">Due strumenti, un'unica estate perfetta</h2>
+    <p class="section-sub">
+      Ogni piattaforma è pensata per risolvere un problema specifico della
+      gestione balneare — sia dal lato cliente che dall'operatore.
+    </p>
+
+    <div class="apps-grid">
+
+      <!-- ── BEACHBOOKING CARD ─────────────────────────────── -->
+      <div class="app-card card-booking">
+        <div class="app-card-header">
+          <div class="app-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- umbrella icon -->
+              <path d="M24 6C14 6 8 14 8 22H24H40C40 14 34 6 24 6Z" fill="white" opacity=".95"/>
+              <rect x="23" y="22" width="2" height="18" rx="1" fill="white" opacity=".95"/>
+              <path d="M23 40 Q19 44 22 45 Q25 46 25 40" fill="white" opacity=".8"/>
+            </svg>
+          </div>
+          <span class="app-tag">Prenotazioni</span>
+          <h2>BeachBooking</h2>
+          <p>La piattaforma per prenotare ombrelloni e accessori online, prima di arrivare in spiaggia.</p>
+        </div>
+
+        <div class="app-card-body">
+          <ul class="feature-list">
+            <li>
+              <span class="feature-icon">🗺️</span>
+              <span><strong>Mappa interattiva</strong> dello stabilimento con ombrelloni disponibili in tempo reale</span>
+            </li>
+            <li>
+              <span class="feature-icon">📅</span>
+              <span><strong>Prenotazione per data</strong> con selezione di fila e posto preciso</span>
+            </li>
+            <li>
+              <span class="feature-icon">🪑</span>
+              <span><strong>Accessori aggiuntivi</strong> — lettini, sdraio, teli e culle baby a noleggio</span>
+            </li>
+            <li>
+              <span class="feature-icon">💳</span>
+              <span><strong>Pagamento online</strong> con PayPal in modo sicuro prima dell'arrivo</span>
+            </li>
+            <li>
+              <span class="feature-icon">📊</span>
+              <span><strong>Dashboard gestore</strong> per configurare prezzi stagionali, layout e disponibilità</span>
+            </li>
+            <li>
+              <span class="feature-icon">🔔</span>
+              <span><strong>Notifiche</strong> di conferma e aggiornamento prenotazione</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="app-card-footer">
+          <a href="https://booking.80-211-137-54.sslip.io" class="btn btn-card btn-card-main" target="_blank">
+            Vai a BeachBooking →
+          </a>
+        </div>
+      </div>
+
+      <!-- ── BEACHDELIVERY CARD ─────────────────────────────── -->
+      <div class="app-card card-delivery">
+        <div class="app-card-header">
+          <div class="app-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- tray/delivery icon -->
+              <rect x="8" y="28" width="32" height="6" rx="3" fill="white" opacity=".95"/>
+              <ellipse cx="24" cy="20" rx="14" ry="10" fill="white" opacity=".8"/>
+              <circle cx="16" cy="34" r="3" fill="white" opacity=".95"/>
+              <circle cx="32" cy="34" r="3" fill="white" opacity=".95"/>
+              <!-- steam lines -->
+              <path d="M18 16 Q19 13 18 10" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
+              <path d="M24 14 Q25 11 24 8" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
+              <path d="M30 16 Q31 13 30 10" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
+            </svg>
+          </div>
+          <span class="app-tag">Food & Drink Delivery</span>
+          <h2>BeachDelivery</h2>
+          <p>Scansiona il QR code del tuo ombrellone e ricevi cibo e bevande direttamente al tuo posto.</p>
+        </div>
+
+        <div class="app-card-body">
+          <ul class="feature-list">
+            <li>
+              <span class="feature-icon">📱</span>
+              <span><strong>Ordine via QR code</strong> — nessuna app da scaricare, basta la fotocamera</span>
+            </li>
+            <li>
+              <span class="feature-icon">🍕</span>
+              <span><strong>Menu digitale</strong> con categorie, foto, prezzi e info su allergeni</span>
+            </li>
+            <li>
+              <span class="feature-icon">🎯</span>
+              <span><strong>Tracking in tempo reale</strong> dell'ordine: in preparazione → in consegna → consegnato</span>
+            </li>
+            <li>
+              <span class="feature-icon">💸</span>
+              <span><strong>Promozioni automatiche</strong> — sconti a percentuale o prezzi fissi per categoria</span>
+            </li>
+            <li>
+              <span class="feature-icon">🌍</span>
+              <span><strong>Multilingua IT/EN</strong> — menu e interfaccia in italiano e inglese</span>
+            </li>
+            <li>
+              <span class="feature-icon">👨‍🍳</span>
+              <span><strong>App camerieri</strong> per gestire le consegne e aggiornare gli stati degli ordini</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="app-card-footer">
+          <a href="https://delivery.80-211-137-54.sslip.io" class="btn btn-card btn-card-main" target="_blank">
+            Vai a BeachDelivery →
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────────────── -->
+<section class="how-section" id="how">
+  <div class="container">
+    <span class="section-label">Come funziona</span>
+    <h2 class="section-title">Semplice per tutti</h2>
+    <p class="section-sub">
+      Che tu sia un cliente in vacanza o il gestore dello stabilimento,
+      ogni flusso è pensato per essere intuitivo e veloce.
+    </p>
+
+    <div class="how-tabs">
+      <button class="how-tab active" data-tab="booking">⛱ BeachBooking</button>
+      <button class="how-tab" data-tab="delivery">🍹 BeachDelivery</button>
+    </div>
+
+    <div class="how-content active" id="tab-booking">
+      <div class="step-card">
+        <span class="step-num">1</span>
+        <div class="step-icon">🔍</div>
+        <h3>Cerca lo stabilimento</h3>
+        <p>Sfoglia i lidi disponibili e scegli la data della tua vacanza.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">2</span>
+        <div class="step-icon">🗺️</div>
+        <h3>Scegli l'ombrellone</h3>
+        <p>Visualizza la mappa del lido e seleziona il posto che preferisci — fila e numero.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">3</span>
+        <div class="step-icon">🪑</div>
+        <h3>Aggiungi accessori</h3>
+        <p>Aggiungi lettini, sdraio o teli mare. Il prezzo si aggiorna in tempo reale.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">4</span>
+        <div class="step-icon">✅</div>
+        <h3>Paga e vai in spiaggia</h3>
+        <p>Pagamento sicuro con PayPal. Arriva in spiaggia e trova il tuo posto già pronto.</p>
+      </div>
+    </div>
+
+    <div class="how-content" id="tab-delivery">
+      <div class="step-card">
+        <span class="step-num">1</span>
+        <div class="step-icon">📷</div>
+        <h3>Scansiona il QR</h3>
+        <p>Sul tuo ombrellone trovi un QR code univoco. Scannerizzalo con la fotocamera.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">2</span>
+        <div class="step-icon">🍔</div>
+        <h3>Scegli dal menu</h3>
+        <p>Menu digitale sempre aggiornato con categorie, prezzi e info su allergeni.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">3</span>
+        <div class="step-icon">💳</div>
+        <h3>Ordina e paga</h3>
+        <p>Conferma l'ordine e paga con PayPal, carta o contanti alla consegna.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">4</span>
+        <div class="step-icon">🚶</div>
+        <h3>Ricevi al posto</h3>
+        <p>Il cameriere porta l'ordine direttamente al tuo ombrellone. Zero attesa al bar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TECH SECTION ───────────────────────────────────────────── -->
+<section class="tech-section" id="tech">
+  <div class="container">
+    <span class="section-label">Tecnologia</span>
+    <h2 class="section-title">Stack moderno, performance garantite</h2>
+    <p class="section-sub">
+      Entrambe le piattaforme girano su una VPS con Docker,
+      database MySQL condiviso e certificato SSL. Architettura scalabile
+      e manutenibile dal primo giorno.
+    </p>
+    <div class="tech-pills">
+      <span class="pill">☕ Spring Boot 3 (Java 21)</span>
+      <span class="pill">⚛️ React 19 + Vite</span>
+      <span class="pill">🐬 MySQL 8</span>
+      <span class="pill">🐳 Docker Compose</span>
+      <span class="pill">🔐 JWT Authentication</span>
+      <span class="pill">💳 PayPal Integration</span>
+      <span class="pill">🔄 WebSocket / STOMP</span>
+      <span class="pill">📱 QR Code Scanner</span>
+      <span class="pill">🌍 i18n (IT / EN)</span>
+      <span class="pill">🔒 HTTPS / Let's Encrypt</span>
+      <span class="pill">🔁 Nginx Reverse Proxy</span>
+      <span class="pill">📦 Maven Build</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA SECTION ────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="container">
+    <span class="section-label">Inizia adesso</span>
+    <h2 class="section-title">Pronto per la stagione?</h2>
+    <p class="section-sub">
+      Scegli la piattaforma che fa per te oppure usale entrambe
+      per gestire prenotazioni e ristorazione dallo stesso stabilimento.
+    </p>
+    <div class="cta-btns">
+      <a href="https://booking.80-211-137-54.sslip.io" class="btn btn-cta-booking" target="_blank">
+        ⛱ Apri BeachBooking
+      </a>
+      <a href="https://delivery.80-211-137-54.sslip.io" class="btn btn-cta-delivery" target="_blank">
+        🍹 Apri BeachDelivery
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────── -->
+<footer>
+  <strong>Beach Platform</strong> — La tua estate digitale
+  <div class="footer-links">
+    <a href="https://booking.80-211-137-54.sslip.io" target="_blank">BeachBooking</a>
+    <a href="https://delivery.80-211-137-54.sslip.io" target="_blank">BeachDelivery</a>
+    <a href="https://api-delivery.80-211-137-54.sslip.io/swagger-ui.html" target="_blank">API Docs</a>
+  </div>
+</footer>
+
+<script>
+  // ── Floating bubbles ────────────────────────────────────────
+  const container = document.getElementById('bubbles');
+  for (let i = 0; i < 18; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = Math.random() * 60 + 20;
+    b.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      animation-duration:${Math.random()*12+8}s;
+      animation-delay:-${Math.random()*12}s;
+    `;
+    container.appendChild(b);
+  }
+
+  // ── How-it-works tabs ───────────────────────────────────────
+  document.querySelectorAll('.how-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.how-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.how-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
