@@ -1,0 +1,6 @@
+[submodule "beachdelivery"]
+	path = beachdelivery
+	url = https://github.com/napule77/beachdelivery.git
+[submodule "beachbooking"]
+	path = beachbooking
+	url = https://github.com/napule77/beachbooking.git
