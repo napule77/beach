@@ -587,4 +587,120 @@ if [[ -z "${PAYPAL_CLIENT_ID}" ]]; then
     echo ""
 fi
 
+# =============================================================================
+#  SUMMARY FILE
+# =============================================================================
+SUMMARY_FILE="${PROJECT_DIR}/INSTALL-SUMMARY.txt"
+INSTALL_DATE=$(date '+%d/%m/%Y %H:%M:%S')
+
+cat > "${SUMMARY_FILE}" << SUMMARYEOF
+================================================================================
+  BEACH PROJECT — RIEPILOGO INSTALLAZIONE
+  Data installazione : ${INSTALL_DATE}
+  VPS IP             : ${VPS_IP}
+================================================================================
+
+── URL PUBBLICI ────────────────────────────────────────────────────────────────
+
+  Landing Page    : https://${BASE_DOMAIN}
+  BeachBooking    : https://booking.${BASE_DOMAIN}
+  BeachDelivery   : https://delivery.${BASE_DOMAIN}
+  API Delivery    : https://api-delivery.${BASE_DOMAIN}
+  API Health      : https://api-delivery.${BASE_DOMAIN}/actuator/health
+
+── CREDENZIALI DATABASE ────────────────────────────────────────────────────────
+
+  MySQL root
+    Utente         : root
+    Password       : ${MYSQL_ROOT_PASS}
+    Host           : 127.0.0.1 (solo rete interna Docker)
+    Porta          : 3306
+
+  BeachBooking DB
+    Database       : beach_booking
+    Password       : ${BB_DB_PASS}
+
+  BeachDelivery DB
+    Database       : beachdelivery
+    Password       : ${BD_DB_PASS}
+
+── JWT SECRETS (generati automaticamente) ──────────────────────────────────────
+
+  BeachBooking JWT Secret:
+    ${BB_JWT}
+
+  BeachDelivery JWT Secret:
+    ${BD_JWT}
+
+── PAYPAL ───────────────────────────────────────────────────────────────────────
+
+  Client ID      : ${PAYPAL_CLIENT_ID:-[NON CONFIGURATO — aggiornare .env]}
+  Client Secret  : ${PAYPAL_CLIENT_SECRET:-[NON CONFIGURATO — aggiornare .env]}
+  Endpoint       : https://api-m.paypal.com
+
+── SSL / CERTBOT ────────────────────────────────────────────────────────────────
+
+  Email           : ${CERTBOT_EMAIL}
+  Provider        : Let's Encrypt (sslip.io)
+  Rinnovo auto    : certbot.timer (systemd)
+  Scadenza cert   : 90 giorni (rinnovo automatico a 60 giorni)
+
+── SMTP / EMAIL ─────────────────────────────────────────────────────────────────
+
+  Host           : ${SMTP_HOST:-[non configurato]}
+  Porta          : ${SMTP_PORT:-587}
+  Username       : ${SMTP_USER:-[non configurato]}
+  Password       : ${SMTP_PASS:-[non configurato]}
+
+── PERCORSI IMPORTANTI ──────────────────────────────────────────────────────────
+
+  Progetto       : ${PROJECT_DIR}/
+  File .env      : ${PROJECT_DIR}/.env
+  Backup DB      : ${PROJECT_DIR}/backups/
+  Nginx sites    : /etc/nginx/sites-available/
+  Certificati    : /etc/letsencrypt/live/
+
+── DOCKER ───────────────────────────────────────────────────────────────────────
+
+  Landing        : 127.0.0.1:8080  (container: beach-landing)
+  BB Frontend    : 127.0.0.1:82    (container: beachbooking-frontend)
+  BD Frontend    : 127.0.0.1:81    (container: beachdelivery-fe)
+  BD API         : 127.0.0.1:8081  (container: beachdelivery-api)
+  MySQL          : 3306            (container: beach-mysql, solo rete interna)
+
+── COMANDI UTILI ────────────────────────────────────────────────────────────────
+
+  Stato container   : cd ${PROJECT_DIR} && docker compose ps
+  Log live          : cd ${PROJECT_DIR} && docker compose logs -f
+  Riavvia servizio  : cd ${PROJECT_DIR} && docker compose restart <nome>
+  Rebuild completo  : cd ${PROJECT_DIR} && docker compose up -d --build
+  Backup manuale    : docker exec beach-mysql mysqldump -u root -p"${MYSQL_ROOT_PASS}" --all-databases --single-transaction > ${PROJECT_DIR}/backups/backup_manual.sql
+  Accesso MySQL     : docker exec -it beach-mysql mysql -u root -p"${MYSQL_ROOT_PASS}"
+
+── BACKUP AUTOMATICO ────────────────────────────────────────────────────────────
+
+  Cron            : ogni giorno alle 03:00
+  Rotazione       : 7 giorni
+  Destinazione    : ${PROJECT_DIR}/backups/backup_YYYYMMDD.sql
+
+================================================================================
+  ⚠  ATTENZIONE: questo file contiene password in chiaro.
+     Scaricalo in locale e cancellalo dalla VPS dopo averlo salvato.
+     Comando per scaricarlo:
+       scp root@${VPS_IP}:${SUMMARY_FILE} ./INSTALL-SUMMARY.txt
+     Comando per cancellarlo dalla VPS:
+       rm -f ${SUMMARY_FILE}
+================================================================================
+SUMMARYEOF
+
+chmod 600 "${SUMMARY_FILE}"
+
+echo -e "\n${GREEN}${BOLD}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}${BOLD}  📄 Summary salvato in: ${SUMMARY_FILE}${NC}"
+echo -e "${GREEN}${BOLD}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "\n  ${YELLOW}Scarica il file in locale con:${NC}"
+echo -e "  ${BOLD}  scp root@${VPS_IP}:${SUMMARY_FILE} ./INSTALL-SUMMARY.txt${NC}"
+echo -e "\n  ${RED}  Poi cancellalo dalla VPS:${NC}"
+echo -e "  ${BOLD}  rm -f ${SUMMARY_FILE}${NC}\n"
+
 echo -e "  ${CYAN}Log dell'installazione completato.${NC}"
