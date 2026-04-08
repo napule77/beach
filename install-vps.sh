@@ -53,20 +53,21 @@ reset_step() {
 
 # Salva le credenziali per il resume (chmod 600)
 save_config() {
-    cat > "${CONFIG_CACHE}" << CONFEOF
-CERTBOT_EMAIL=${CERTBOT_EMAIL}
-MYSQL_ROOT_PASS=${MYSQL_ROOT_PASS}
-BB_DB_PASS=${BB_DB_PASS}
-BD_DB_PASS=${BD_DB_PASS}
-BB_JWT=${BB_JWT}
-BD_JWT=${BD_JWT}
-PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
-PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
-SMTP_HOST=${SMTP_HOST}
-SMTP_PORT=${SMTP_PORT}
-SMTP_USER=${SMTP_USER}
-SMTP_PASS=${SMTP_PASS}
-CONFEOF
+    # printf '%q' quota correttamente ogni valore (gestisce spazi, =, +, / nei JWT/password)
+    {
+        printf 'CERTBOT_EMAIL=%q\n'        "${CERTBOT_EMAIL}"
+        printf 'MYSQL_ROOT_PASS=%q\n'      "${MYSQL_ROOT_PASS}"
+        printf 'BB_DB_PASS=%q\n'           "${BB_DB_PASS}"
+        printf 'BD_DB_PASS=%q\n'           "${BD_DB_PASS}"
+        printf 'BB_JWT=%q\n'               "${BB_JWT}"
+        printf 'BD_JWT=%q\n'               "${BD_JWT}"
+        printf 'PAYPAL_CLIENT_ID=%q\n'     "${PAYPAL_CLIENT_ID}"
+        printf 'PAYPAL_CLIENT_SECRET=%q\n' "${PAYPAL_CLIENT_SECRET}"
+        printf 'SMTP_HOST=%q\n'            "${SMTP_HOST}"
+        printf 'SMTP_PORT=%q\n'            "${SMTP_PORT}"
+        printf 'SMTP_USER=%q\n'            "${SMTP_USER}"
+        printf 'SMTP_PASS=%q\n'            "${SMTP_PASS}"
+    } > "${CONFIG_CACHE}"
     chmod 600 "${CONFIG_CACHE}"
 }
 
