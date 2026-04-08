@@ -280,7 +280,8 @@ else
     if confirm "Configurare il firewall UFW (22 SSH + 80 HTTP + 443 HTTPS)?"; then
         ufw allow 22   comment 'SSH'   >/dev/null
         ufw allow 80   comment 'HTTP'  >/dev/null
-        ufw allow 443  comment 'HTTPS' >/dev/null
+        ufw allow 443   comment 'HTTPS'  >/dev/null
+        ufw allow 33006 comment 'MySQL remoto' >/dev/null
         ufw --force enable >/dev/null
         ok "Firewall attivo."
         ufw status | sed 's/^/    /'

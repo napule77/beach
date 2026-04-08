@@ -22,10 +22,10 @@ services:
       BEACHBOOKING_DB_PASSWORD: ${BEACHBOOKING_DB_PASSWORD}
       BEACHDELIVERY_DB_PASSWORD: ${BEACHDELIVERY_DB_PASSWORD}
     command: --default-authentication-plugin=mysql_native_password
-    # MySQL NON esposto su internet: accessibile solo dentro la rete Docker
-    # Per manutenzione da host: docker exec -it beach-mysql mysql -u root -p
-    expose:
-      - "3306"
+    # Porta 33006 esposta su tutte le interfacce per accesso remoto
+    # (UFW lascia passare solo connessioni autorizzate)
+    ports:
+      - "33006:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
