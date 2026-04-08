@@ -120,10 +120,15 @@ echo ""
 # =============================================================================
 step "0" "Raccolta credenziali e configurazione"
 
-if is_done "step-0"; then
+if is_done "step-0" && [[ -f "${CONFIG_CACHE}" ]]; then
     ok "Step già completato — carico la configurazione salvata."
     load_config
 else
+    # Config cache mancante (es. skip manuale): resetta e ri-raccoglie
+    if is_done "step-0" && [[ ! -f "${CONFIG_CACHE}" ]]; then
+        warn "Config cache non trovata — raccolgo nuovamente le credenziali."
+        reset_step "step-0"
+    fi
     echo -e "\n${BOLD}  Prima di iniziare, inserisci i valori di configurazione.${NC}"
     echo -e "  Verranno usati per creare il file .env e i certificati SSL.\n"
 
