@@ -756,6 +756,34 @@
       setInterval(() => reg.update(), 60 * 60 * 1000);
     });
   }
+
+  // Cattura l'evento di installazione PWA e mostra un bottone custom
+  let _installPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    _installPrompt = e;
+    const btn = document.getElementById('pwa-install-btn');
+    if (btn) btn.style.display = 'flex';
+  });
+  window.addEventListener('appinstalled', () => {
+    const btn = document.getElementById('pwa-install-btn');
+    if (btn) btn.style.display = 'none';
+    _installPrompt = null;
+  });
+  function installPWA() {
+    if (_installPrompt) {
+      _installPrompt.prompt();
+      _installPrompt.userChoice.then(() => { _installPrompt = null; });
+    }
+  }
 </script>
+<!-- Bottone installazione PWA (visibile solo quando il browser supporta l'install prompt) -->
+<div id="pwa-install-btn" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;z-index:9998;
+  background:#0077b6;color:#fff;padding:.75rem 1.25rem;border-radius:50px;
+  box-shadow:0 4px 20px rgba(0,119,182,.4);align-items:center;gap:.5rem;
+  font-family:Inter,sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;border:none;"
+  onclick="installPWA()">
+  📲 Installa l'app
+</div>
 </body>
 </html>
