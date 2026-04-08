@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#0077b6"/>
+  <!-- Sun -->
+  <circle cx="256" cy="170" r="60" fill="#f9c74f"/>
+  <!-- Sun rays -->
+  <g stroke="#f9c74f" stroke-width="12" stroke-linecap="round">
+    <line x1="256" y1="80" x2="256" y2="55"/>
+    <line x1="320" y1="104" x2="338" y2="86"/>
+    <line x1="346" y1="170" x2="371" y2="170"/>
+    <line x1="320" y1="236" x2="338" y2="254"/>
+    <line x1="192" y1="104" x2="174" y2="86"/>
+    <line x1="166" y1="170" x2="141" y2="170"/>
+    <line x1="192" y1="236" x2="174" y2="254"/>
+  </g>
+  <!-- Sea waves -->
+  <path d="M0 340 Q64 310 128 340 Q192 370 256 340 Q320 310 384 340 Q448 370 512 340 L512 512 L0 512 Z" fill="#90e0ef"/>
+  <path d="M0 370 Q64 345 128 370 Q192 395 256 370 Q320 345 384 370 Q448 395 512 370 L512 512 L0 512 Z" fill="#caf0f8"/>
+  <!-- Beach umbrella pole -->
+  <rect x="248" y="270" width="10" height="100" fill="#f4c97c" rx="4"/>
+  <!-- Umbrella canopy -->
+  <path d="M180 280 Q253 230 326 280 Q290 260 253 265 Q216 260 180 280 Z" fill="#f94144"/>
+  <path d="M180 280 Q217 260 253 265 Z" fill="#f9c74f"/>
+  <path d="M253 265 Q290 260 326 280 Z" fill="#f9c74f"/>
+</svg>
