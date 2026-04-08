@@ -1,0 +1,100 @@
+================================================================================
+  BEACH PROJECT — RIEPILOGO INSTALLAZIONE
+  Data installazione : 08/04/2026 10:10:09
+  VPS IP             : 80.211.137.54
+================================================================================
+
+── URL PUBBLICI ────────────────────────────────────────────────────────────────
+
+  Landing Page    : https://80-211-137-54.sslip.io
+  BeachBooking    : https://booking.80-211-137-54.sslip.io
+  BeachDelivery   : https://delivery.80-211-137-54.sslip.io
+  API Delivery    : https://api-delivery.80-211-137-54.sslip.io
+  API Health      : https://api-delivery.80-211-137-54.sslip.io/actuator/health
+
+── CREDENZIALI DATABASE ────────────────────────────────────────────────────────
+
+  MySQL root
+    Utente         : root
+    Password       : 7m35r1.n37_2026
+    Host           : 127.0.0.1 (solo rete interna Docker)
+    Porta          : 3306
+
+  BeachBooking DB
+    Database       : beach_booking
+    Password       : beach2026_db_!password
+
+  BeachDelivery DB
+    Database       : beachdelivery
+    Password       : beach2026_db_!password
+
+── JWT SECRETS (generati automaticamente) ──────────────────────────────────────
+
+  BeachBooking JWT Secret:
+    PwqsTTRFE+fcaZ3398netLvUvjj84XgwTQQhrIX8goZhyuo9rynhQRg6SdPE7q8m
+
+  BeachDelivery JWT Secret:
+    xputugBRoqByVN2YmoDIkaeNz/5/rJIyTfmB15smCQn/lNy7/ACQicv5tKWjodxP
+rZpup0Od2dP61Xejkl7jFbM32JW0/Z/U
+
+── PAYPAL ────────────────────────────────────────────────────────────────────────
+
+  Client ID      : [NON CONFIGURATO — aggiornare .env]
+  Client Secret  : [NON CONFIGURATO — aggiornare .env]
+  Endpoint       : https://api-m.paypal.com
+
+── SSL / CERTBOT ────────────────────────────────────────────────────────────────
+
+  Email           : arturo.amalfi@gmail.com
+  Provider        : Let's Encrypt (sslip.io)
+  Rinnovo auto    : certbot.timer (systemd)
+  Scadenza cert   : 90 giorni (rinnovo automatico a 60 giorni)
+
+── SMTP / EMAIL ─────────────────────────────────────────────────────────────────
+
+  Host           : [non configurato]
+  Porta          : 587
+  Username       : [non configurato]
+  Password       : [non configurato]
+
+── PERCORSI IMPORTANTI ──────────────────────────────────────────────────────────
+
+  Progetto       : /opt/beach/
+  File .env      : /opt/beach/.env
+  Backup DB      : /opt/beach/backups/
+  Nginx sites    : /etc/nginx/sites-available/
+  Certificati    : /etc/letsencrypt/live/
+  State file     : /opt/.beach-install-state
+  Config cache   : /opt/.beach-install-config
+
+── DOCKER ────────────────────────────────────────────────────────────────────────
+
+  Landing        : 127.0.0.1:8080  (container: beach-landing)
+  BB Frontend    : 127.0.0.1:82    (container: beachbooking-frontend)
+  BD Frontend    : 127.0.0.1:81    (container: beachdelivery-fe)
+  BD API         : 127.0.0.1:8081  (container: beachdelivery-api)
+  MySQL          : 3306            (container: beach-mysql, solo rete interna)
+
+── COMANDI UTILI ────────────────────────────────────────────────────────────────
+
+  Stato container   : cd /opt/beach && docker compose ps
+  Log live          : cd /opt/beach && docker compose logs -f
+  Riavvia servizio  : cd /opt/beach && docker compose restart <nome>
+  Rebuild completo  : cd /opt/beach && docker compose up -d --build
+  Backup manuale    : docker exec beach-mysql mysqldump -u root -p"7m35r1.n37_2026" --all-databases --single-transaction > /opt/beach/backups/backup_manual.sql
+  Accesso MySQL     : docker exec -it beach-mysql mysql -u root -p"7m35r1.n37_2026"
+
+── BACKUP AUTOMATICO ────────────────────────────────────────────────────────────
+
+  Cron            : ogni giorno alle 03:00
+  Rotazione       : 7 giorni
+  Destinazione    : /opt/beach/backups/backup_YYYYMMDD.sql
+
+================================================================================
+  ⚠  ATTENZIONE: questo file contiene password in chiaro.
+     Scaricalo in locale e cancellalo dalla VPS dopo averlo salvato.
+     Comando per scaricarlo:
+       scp root@80.211.137.54:/opt/beach/INSTALL-SUMMARY.txt ./INSTALL-SUMMARY.txt
+     Comando per cancellarlo dalla VPS:
+       rm -f /opt/beach/INSTALL-SUMMARY.txt
+================================================================================
