@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0077b6" />
+  <link rel="manifest" href="/manifest.webmanifest" />
   <title>Beach Platform — La tua estate digitale</title>
   <meta name="description" content="Prenota il tuo ombrellone e ordina cibo e bevande direttamente sulla spiaggia. La piattaforma digitale completa per il tuo stabilimento balneare." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -727,6 +729,33 @@
       document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
     });
   });
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then((reg) => {
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        newSW.addEventListener('statechange', () => {
+          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+            const banner = document.createElement('div');
+            banner.innerHTML = `
+              <div id="pwa-banner" style="position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:9999;
+                background:#0077b6;color:#fff;padding:.75rem 1.25rem;border-radius:12px;
+                box-shadow:0 4px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:.75rem;font-family:Inter,sans-serif;font-size:.875rem">
+                <span>🔄 Nuova versione disponibile!</span>
+                <button onclick="navigator.serviceWorker.controller&&navigator.serviceWorker.controller.postMessage({type:'SKIP_WAITING'});window.location.reload()"
+                  style="background:#fff;color:#0077b6;border:none;border-radius:8px;padding:.25rem .75rem;font-weight:600;cursor:pointer">Aggiorna</button>
+                <button onclick="document.getElementById('pwa-banner').remove()"
+                  style="background:none;border:none;color:rgba(255,255,255,.7);font-size:1.25rem;cursor:pointer;line-height:1">×</button>
+              </div>`;
+            document.body.appendChild(banner.firstElementChild);
+          }
+        });
+      });
+      // Controlla aggiornamenti ogni ora
+      setInterval(() => reg.update(), 60 * 60 * 1000);
+    });
+  }
 </script>
 </body>
 </html>

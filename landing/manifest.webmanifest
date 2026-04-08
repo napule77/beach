@@ -1,0 +1,17 @@
+{
+  "name": "Beach Platform – La tua estate digitale",
+  "short_name": "Beach Platform",
+  "description": "Prenota il tuo ombrellone e ordina cibo e bevande direttamente sulla spiaggia.",
+  "theme_color": "#0077b6",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    }
+  ]
+}

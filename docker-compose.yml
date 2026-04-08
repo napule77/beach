@@ -1,4 +1,4 @@
-services:
+/services:
 
   # ================================================================
   # LANDING PAGE  –  porta 80 interna, servita via Nginx su :443
