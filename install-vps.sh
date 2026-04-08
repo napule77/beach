@@ -166,8 +166,8 @@ else
     done
 
     # JWT secrets generati automaticamente (stabili per questa sessione)
-    BB_JWT=$(openssl rand -base64 48)
-    BD_JWT=$(openssl rand -base64 72)
+    BB_JWT=$(openssl rand -hex 48)
+    BD_JWT=$(openssl rand -hex 72)
 
     # PayPal
     echo -e "\n  ${CYAN}PayPal Client ID${NC} (lascia vuoto per configurare dopo):"
@@ -339,29 +339,31 @@ else
     cd "${PROJECT_DIR}"
     [[ -f .env.example ]] && cp .env.example .env
 
+    # Nota: i valori sono quotati con "" per evitare problemi con caratteri
+    # speciali (/, +, =) che Docker Compose non accetta senza virgolette.
     cat > .env << ENVEOF
 # ================================================================
 # MYSQL CONDIVISO
 # ================================================================
-MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASS}
+MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASS}"
 
 # ================================================================
 # BEACH BOOKING
 # ================================================================
-BEACHBOOKING_DB_PASSWORD=${BB_DB_PASS}
-BEACHBOOKING_JWT_SECRET=${BB_JWT}
+BEACHBOOKING_DB_PASSWORD="${BB_DB_PASS}"
+BEACHBOOKING_JWT_SECRET="${BB_JWT}"
 
 # PayPal
-PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID:-CONFIGURA_QUI}
-PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET:-CONFIGURA_QUI}
+PAYPAL_CLIENT_ID="${PAYPAL_CLIENT_ID:-CONFIGURA_QUI}"
+PAYPAL_CLIENT_SECRET="${PAYPAL_CLIENT_SECRET:-CONFIGURA_QUI}"
 PAYPAL_BASE_URL=https://api-m.paypal.com
-VITE_PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID:-CONFIGURA_QUI}
+VITE_PAYPAL_CLIENT_ID="${PAYPAL_CLIENT_ID:-CONFIGURA_QUI}"
 
 # ================================================================
 # BEACH DELIVERY
 # ================================================================
-BEACHDELIVERY_DB_PASSWORD=${BD_DB_PASS}
-BEACHDELIVERY_JWT_SECRET=${BD_JWT}
+BEACHDELIVERY_DB_PASSWORD="${BD_DB_PASS}"
+BEACHDELIVERY_JWT_SECRET="${BD_JWT}"
 
 BEACHDELIVERY_API_URL=https://api-delivery.${BASE_DOMAIN}
 APP_CORS_ALLOWED_ORIGINS=https://delivery.${BASE_DOMAIN}
@@ -373,7 +375,7 @@ SPRING_JPA_HIBERNATE_DDL_AUTO=validate
 SPRING_MAIL_HOST=${SMTP_HOST:-smtp.tuoprovider.com}
 SPRING_MAIL_PORT=${SMTP_PORT:-587}
 SPRING_MAIL_USERNAME=${SMTP_USER:-tua_email@dominio.com}
-SPRING_MAIL_PASSWORD=${SMTP_PASS:-TuaPasswordEmail}
+SPRING_MAIL_PASSWORD="${SMTP_PASS:-TuaPasswordEmail}"
 ENVEOF
 
     chmod 600 .env
