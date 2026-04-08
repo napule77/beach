@@ -572,7 +572,7 @@ if is_done "step-10"; then
 else
     if confirm "Configurare il backup automatico del database ogni notte alle 3:00?"; then
         mkdir -p "${PROJECT_DIR}/backups"
-        (crontab -l 2>/dev/null | grep -v "beach/backups"
+        (crontab -l 2>/dev/null | grep -v "beach/backups" || true
          echo "0 3 * * * docker exec beach-mysql mysqldump -u root -p\"\$(grep MYSQL_ROOT_PASSWORD ${PROJECT_DIR}/.env | cut -d= -f2)\" --all-databases --single-transaction > ${PROJECT_DIR}/backups/backup_\$(date +\\%Y\\%m\\%d).sql && find ${PROJECT_DIR}/backups -name '*.sql' -mtime +7 -delete") \
         | crontab -
         ok "Cron configurato: backup ogni giorno alle 03:00, rotazione 7 giorni."
