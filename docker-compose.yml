@@ -94,7 +94,7 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/beachdelivery?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/beachdelivery?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull
       SPRING_DATASOURCE_USERNAME: bdapp
       SPRING_DATASOURCE_PASSWORD: ${BEACHDELIVERY_DB_PASSWORD}
       JWT_SECRET: ${BEACHDELIVERY_JWT_SECRET}
