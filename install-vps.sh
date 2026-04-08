@@ -2,33 +2,31 @@
 # =============================================================================
 #  install-vps.sh — Auto-installer guidato per Beach Project
 #  VPS: 80.211.137.54  |  OS: Ubuntu 22.04 LTS
+#  Supporta il resume: se interrotto, riparte dall'ultimo step fallito.
 # =============================================================================
 set -euo pipefail
 
-# ── Colori ──────────────────────────────────────────────────────────────────
+# ── Colori ───────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; NC='\033[0m'
 
-# ── Costanti ─────────────────────────────────────────────────────────────────
+# ── Costanti ──────────────────────────────────────────────────────────────────
 VPS_IP="80.211.137.54"
 BASE_DOMAIN="${VPS_IP//./-}.sslip.io"
 PROJECT_DIR="/opt/beach"
+STATE_FILE="/opt/.beach-install-state"   # step completati (uno per riga)
+CONFIG_CACHE="/opt/.beach-install-config" # credenziali per il resume
 
-# ── Helper ───────────────────────────────────────────────────────────────────
-step()    { echo -e "\n${BOLD}${BLUE}══════════════════════════════════════════════${NC}"; \
-            echo -e "${BOLD}${BLUE}  STEP $1: $2${NC}"; \
+# ── Helper generici ───────────────────────────────────────────────────────────
+step()    { echo -e "\n${BOLD}${BLUE}══════════════════════════════════════════════${NC}"
+            echo -e "${BOLD}${BLUE}  STEP $1: $2${NC}"
             echo -e "${BOLD}${BLUE}══════════════════════════════════════════════${NC}"; }
 ok()      { echo -e "  ${GREEN}✔  $*${NC}"; }
 warn()    { echo -e "  ${YELLOW}⚠  $*${NC}"; }
 err()     { echo -e "  ${RED}✖  $*${NC}"; }
 info()    { echo -e "  ${CYAN}ℹ  $*${NC}"; }
 pause()   { echo -e "\n${YELLOW}  Premi [INVIO] per continuare o Ctrl+C per interrompere…${NC}"; read -r; }
-confirm() {
-    local msg="$1"
-    echo -e "\n${YELLOW}  ${msg} [s/N]: ${NC}\c"
-    read -r ans
-    [[ "$ans" =~ ^[sS]$ ]]
-}
+confirm() { echo -e "\n${YELLOW}  $1 [s/N]: ${NC}\c"; read -r ans; [[ "$ans" =~ ^[sS]$ ]]; }
 
 check_root() {
     if [[ $EUID -ne 0 ]]; then
@@ -38,7 +36,47 @@ check_root() {
     fi
 }
 
-# ── Banner ───────────────────────────────────────────────────────────────────
+# ── Sistema di resume ─────────────────────────────────────────────────────────
+# mark_done <id>   — segna uno step come completato
+# is_done   <id>   — ritorna 0 (true) se già completato
+# reset_step <id>  — rimuove uno step dallo state (per ri-eseguirlo)
+
+mark_done() { echo "$1" >> "${STATE_FILE}"; }
+
+is_done() {
+    [[ -f "${STATE_FILE}" ]] && grep -qx "$1" "${STATE_FILE}"
+}
+
+reset_step() {
+    [[ -f "${STATE_FILE}" ]] && sed -i "/^${1}$/d" "${STATE_FILE}"
+}
+
+# Salva le credenziali per il resume (chmod 600)
+save_config() {
+    cat > "${CONFIG_CACHE}" << CONFEOF
+CERTBOT_EMAIL=${CERTBOT_EMAIL}
+MYSQL_ROOT_PASS=${MYSQL_ROOT_PASS}
+BB_DB_PASS=${BB_DB_PASS}
+BD_DB_PASS=${BD_DB_PASS}
+BB_JWT=${BB_JWT}
+BD_JWT=${BD_JWT}
+PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
+SMTP_HOST=${SMTP_HOST}
+SMTP_PORT=${SMTP_PORT}
+SMTP_USER=${SMTP_USER}
+SMTP_PASS=${SMTP_PASS}
+CONFEOF
+    chmod 600 "${CONFIG_CACHE}"
+}
+
+# Carica le credenziali salvate (resume)
+load_config() {
+    # shellcheck source=/dev/null
+    source "${CONFIG_CACHE}"
+}
+
+# ── Banner ────────────────────────────────────────────────────────────────────
 clear
 echo -e "${BOLD}${CYAN}"
 cat << 'BANNER'
@@ -52,99 +90,127 @@ cat << 'BANNER'
 BANNER
 echo -e "${NC}"
 echo -e "  Questo script installa e configura l'intero progetto Beach sulla VPS."
-echo -e "  Ogni passo richiede conferma. Puoi interrompere in qualsiasi momento."
+echo -e "  ${BOLD}Supporta il resume:${NC} se interrotto, riparte dall'ultimo step fallito."
 echo -e "\n  ${BOLD}URL finali dopo l'installazione:${NC}"
 echo -e "  🏠 Landing    → https://${BASE_DOMAIN}"
 echo -e "  ⛱  Booking    → https://booking.${BASE_DOMAIN}"
 echo -e "  🍹 Delivery   → https://delivery.${BASE_DOMAIN}"
 echo -e "  🔌 API        → https://api-delivery.${BASE_DOMAIN}"
-echo ""
 
 check_root
 
+# Mostra stato attuale se esiste già una sessione parziale
+if [[ -f "${STATE_FILE}" ]]; then
+    echo -e "\n${YELLOW}${BOLD}  ► Sessione precedente rilevata. Step già completati:${NC}"
+    while IFS= read -r line; do
+        echo -e "    ${GREEN}✔${NC}  ${line}"
+    done < "${STATE_FILE}"
+    echo ""
+    if confirm "Vuoi AZZERARE la sessione e ricominciare da capo?"; then
+        rm -f "${STATE_FILE}" "${CONFIG_CACHE}"
+        ok "Sessione azzerata. Ripartenza da zero."
+    else
+        ok "Riprendo dall'ultimo step non completato."
+    fi
+fi
+echo ""
+
 # =============================================================================
-#  RACCOLTA CONFIGURAZIONE INIZIALE
+#  STEP 0 — Raccolta credenziali
 # =============================================================================
 step "0" "Raccolta credenziali e configurazione"
 
-echo -e "\n${BOLD}  Prima di iniziare, inserisci i valori di configurazione.${NC}"
-echo -e "  Verranno usati per creare il file .env e i certificati SSL.\n"
+if is_done "step-0"; then
+    ok "Step già completato — carico la configurazione salvata."
+    load_config
+else
+    echo -e "\n${BOLD}  Prima di iniziare, inserisci i valori di configurazione.${NC}"
+    echo -e "  Verranno usati per creare il file .env e i certificati SSL.\n"
 
-# Email
-echo -e "  ${CYAN}Email per Let's Encrypt (notifiche scadenza certificati):${NC}"
-read -r -p "  > " CERTBOT_EMAIL
-while [[ -z "$CERTBOT_EMAIL" || ! "$CERTBOT_EMAIL" =~ ^[^@]+@[^@]+\.[^@]+$ ]]; do
-    warn "Inserisci un indirizzo email valido."
+    # Email
+    echo -e "  ${CYAN}Email per Let's Encrypt (notifiche scadenza certificati):${NC}"
     read -r -p "  > " CERTBOT_EMAIL
-done
+    while [[ -z "$CERTBOT_EMAIL" || ! "$CERTBOT_EMAIL" =~ ^[^@]+@[^@]+\.[^@]+$ ]]; do
+        warn "Inserisci un indirizzo email valido."
+        read -r -p "  > " CERTBOT_EMAIL
+    done
 
-# Password MySQL root
-echo -e "\n  ${CYAN}Password MySQL root (min 12 caratteri):${NC}"
-read -r -s -p "  > " MYSQL_ROOT_PASS; echo ""
-while [[ ${#MYSQL_ROOT_PASS} -lt 12 ]]; do
-    warn "La password deve essere di almeno 12 caratteri."
+    # Password MySQL root
+    echo -e "\n  ${CYAN}Password MySQL root (min 12 caratteri):${NC}"
     read -r -s -p "  > " MYSQL_ROOT_PASS; echo ""
-done
+    while [[ ${#MYSQL_ROOT_PASS} -lt 12 ]]; do
+        warn "La password deve essere di almeno 12 caratteri."
+        read -r -s -p "  > " MYSQL_ROOT_PASS; echo ""
+    done
 
-# Password BeachBooking DB
-echo -e "\n  ${CYAN}Password DB BeachBooking (min 12 caratteri):${NC}"
-read -r -s -p "  > " BB_DB_PASS; echo ""
-while [[ ${#BB_DB_PASS} -lt 12 ]]; do
-    warn "La password deve essere di almeno 12 caratteri."
+    # Password BeachBooking DB
+    echo -e "\n  ${CYAN}Password DB BeachBooking (min 12 caratteri):${NC}"
     read -r -s -p "  > " BB_DB_PASS; echo ""
-done
+    while [[ ${#BB_DB_PASS} -lt 12 ]]; do
+        warn "La password deve essere di almeno 12 caratteri."
+        read -r -s -p "  > " BB_DB_PASS; echo ""
+    done
 
-# Password BeachDelivery DB
-echo -e "\n  ${CYAN}Password DB BeachDelivery (min 12 caratteri):${NC}"
-read -r -s -p "  > " BD_DB_PASS; echo ""
-while [[ ${#BD_DB_PASS} -lt 12 ]]; do
-    warn "La password deve essere di almeno 12 caratteri."
+    # Password BeachDelivery DB
+    echo -e "\n  ${CYAN}Password DB BeachDelivery (min 12 caratteri):${NC}"
     read -r -s -p "  > " BD_DB_PASS; echo ""
-done
+    while [[ ${#BD_DB_PASS} -lt 12 ]]; do
+        warn "La password deve essere di almeno 12 caratteri."
+        read -r -s -p "  > " BD_DB_PASS; echo ""
+    done
 
-# JWT secrets (generati automaticamente se non forniti)
-BB_JWT=$(openssl rand -base64 48)
-BD_JWT=$(openssl rand -base64 72)
+    # JWT secrets generati automaticamente (stabili per questa sessione)
+    BB_JWT=$(openssl rand -base64 48)
+    BD_JWT=$(openssl rand -base64 72)
 
-# PayPal
-echo -e "\n  ${CYAN}PayPal Client ID${NC} (lascia vuoto per configurare dopo):"
-read -r -p "  > " PAYPAL_CLIENT_ID
-echo -e "  ${CYAN}PayPal Client Secret${NC} (lascia vuoto per configurare dopo):"
-read -r -p "  > " PAYPAL_CLIENT_SECRET
+    # PayPal
+    echo -e "\n  ${CYAN}PayPal Client ID${NC} (lascia vuoto per configurare dopo):"
+    read -r -p "  > " PAYPAL_CLIENT_ID
+    echo -e "  ${CYAN}PayPal Client Secret${NC} (lascia vuoto per configurare dopo):"
+    read -r -p "  > " PAYPAL_CLIENT_SECRET
 
-# Mail SMTP (opzionale)
-echo -e "\n  ${CYAN}SMTP host per le email${NC} (lascia vuoto per saltare):"
-read -r -p "  > " SMTP_HOST
-SMTP_PORT="587"; SMTP_USER=""; SMTP_PASS=""
-if [[ -n "$SMTP_HOST" ]]; then
-    read -r -p "  SMTP porta [587]: " SMTP_PORT_IN
-    SMTP_PORT="${SMTP_PORT_IN:-587}"
-    read -r -p "  SMTP username: " SMTP_USER
-    read -r -s -p "  SMTP password: " SMTP_PASS; echo ""
+    # Mail SMTP (opzionale)
+    echo -e "\n  ${CYAN}SMTP host per le email${NC} (lascia vuoto per saltare):"
+    read -r -p "  > " SMTP_HOST
+    SMTP_PORT="587"; SMTP_USER=""; SMTP_PASS=""
+    if [[ -n "$SMTP_HOST" ]]; then
+        read -r -p "  SMTP porta [587]: " SMTP_PORT_IN
+        SMTP_PORT="${SMTP_PORT_IN:-587}"
+        read -r -p "  SMTP username: " SMTP_USER
+        read -r -s -p "  SMTP password: " SMTP_PASS; echo ""
+    fi
+
+    echo -e "\n${GREEN}  ✔ Configurazione raccolta. Riepilogo:${NC}"
+    echo    "  ├─ Email SSL   : $CERTBOT_EMAIL"
+    echo    "  ├─ MySQL root  : ••••••••"
+    echo    "  ├─ BB DB pass  : ••••••••"
+    echo    "  ├─ BD DB pass  : ••••••••"
+    echo    "  ├─ PayPal ID   : ${PAYPAL_CLIENT_ID:-[da configurare]}"
+    echo    "  └─ SMTP host   : ${SMTP_HOST:-[non configurato]}"
+    pause
+
+    save_config
+    mark_done "step-0"
 fi
-
-echo -e "\n${GREEN}  ✔ Configurazione raccolta. Riepilogo:${NC}"
-echo    "  ├─ Email SSL   : $CERTBOT_EMAIL"
-echo    "  ├─ MySQL root  : ••••••••"
-echo    "  ├─ BB DB pass  : ••••••••"
-echo    "  ├─ BD DB pass  : ••••••••"
-echo    "  ├─ PayPal ID   : ${PAYPAL_CLIENT_ID:-[da configurare]}"
-echo    "  └─ SMTP host   : ${SMTP_HOST:-[non configurato]}"
-pause
 
 # =============================================================================
 #  STEP 1 — Setup iniziale sistema
 # =============================================================================
 step "1" "Setup iniziale VPS"
 
-if confirm "Aggiornare il sistema e installare i tool essenziali?"; then
-    info "Aggiornamento pacchetti in corso…"
-    apt update -qq && apt upgrade -y -qq
-    apt install -y git curl wget ufw nano htop net-tools -qq
-    timedatectl set-timezone Europe/Rome
-    ok "Sistema aggiornato. Timezone: $(timedatectl show -p Timezone --value)"
+if is_done "step-1"; then
+    ok "Step già completato — skip."
 else
-    warn "Step saltato."
+    if confirm "Aggiornare il sistema e installare i tool essenziali?"; then
+        info "Aggiornamento pacchetti in corso…"
+        apt update -qq && apt upgrade -y -qq
+        apt install -y git curl wget ufw nano htop net-tools -qq
+        timedatectl set-timezone Europe/Rome
+        ok "Sistema aggiornato. Timezone: $(timedatectl show -p Timezone --value)"
+        mark_done "step-1"
+    else
+        warn "Step saltato manualmente."
+    fi
 fi
 
 # =============================================================================
@@ -152,18 +218,22 @@ fi
 # =============================================================================
 step "2" "Installazione Docker"
 
-if command -v docker &>/dev/null; then
-    ok "Docker già installato: $(docker --version)"
+if is_done "step-2"; then
+    ok "Step già completato — skip."
 else
-    if confirm "Installare Docker?"; then
+    if command -v docker &>/dev/null; then
+        ok "Docker già installato: $(docker --version)"
+        mark_done "step-2"
+    elif confirm "Installare Docker?"; then
         info "Download e installazione Docker…"
         curl -fsSL https://get.docker.com | sh
         systemctl enable docker --quiet
         systemctl start docker
         ok "Docker installato: $(docker --version)"
         ok "Docker Compose: $(docker compose version)"
+        mark_done "step-2"
     else
-        warn "Step saltato. Docker è obbligatorio per proseguire."
+        warn "Step saltato manualmente. Docker è obbligatorio per proseguire."
     fi
 fi
 
@@ -172,22 +242,25 @@ fi
 # =============================================================================
 step "3" "Installazione Nginx e Certbot"
 
-if confirm "Installare Nginx e Certbot?"; then
-    # Ferma Apache se presente (occupa la porta 80)
-    if systemctl is-active --quiet apache2 2>/dev/null; then
-        warn "Apache2 rilevato sulla porta 80 — disabilitazione in corso…"
-        systemctl stop apache2
-        systemctl disable apache2
-        ok "Apache2 disabilitato."
-    fi
-
-    apt install -y nginx certbot python3-certbot-nginx -qq
-    systemctl enable nginx --quiet
-    systemctl start nginx
-    ok "Nginx installato e avviato: $(nginx -v 2>&1)"
-    ok "Certbot installato: $(certbot --version)"
+if is_done "step-3"; then
+    ok "Step già completato — skip."
 else
-    warn "Step saltato."
+    if confirm "Installare Nginx e Certbot?"; then
+        if systemctl is-active --quiet apache2 2>/dev/null; then
+            warn "Apache2 rilevato sulla porta 80 — disabilitazione in corso…"
+            systemctl stop apache2
+            systemctl disable apache2
+            ok "Apache2 disabilitato."
+        fi
+        apt install -y nginx certbot python3-certbot-nginx -qq
+        systemctl enable nginx --quiet
+        systemctl start nginx
+        ok "Nginx installato e avviato: $(nginx -v 2>&1)"
+        ok "Certbot installato: $(certbot --version)"
+        mark_done "step-3"
+    else
+        warn "Step saltato manualmente."
+    fi
 fi
 
 # =============================================================================
@@ -195,16 +268,20 @@ fi
 # =============================================================================
 step "4" "Configurazione Firewall (UFW)"
 
-if confirm "Configurare il firewall UFW (22 SSH + 80 HTTP + 443 HTTPS)?"; then
-    ufw allow 22   comment 'SSH'   >/dev/null
-    ufw allow 80   comment 'HTTP'  >/dev/null
-    ufw allow 443  comment 'HTTPS' >/dev/null
-    # Abilita senza prompt interattivo
-    ufw --force enable >/dev/null
-    ok "Firewall attivo."
-    ufw status | sed 's/^/    /'
+if is_done "step-4"; then
+    ok "Step già completato — skip."
 else
-    warn "Step saltato. Assicurati che le porte 22/80/443 siano aperte."
+    if confirm "Configurare il firewall UFW (22 SSH + 80 HTTP + 443 HTTPS)?"; then
+        ufw allow 22   comment 'SSH'   >/dev/null
+        ufw allow 80   comment 'HTTP'  >/dev/null
+        ufw allow 443  comment 'HTTPS' >/dev/null
+        ufw --force enable >/dev/null
+        ok "Firewall attivo."
+        ufw status | sed 's/^/    /'
+        mark_done "step-4"
+    else
+        warn "Step saltato manualmente. Assicurati che le porte 22/80/443 siano aperte."
+    fi
 fi
 
 # =============================================================================
@@ -212,54 +289,48 @@ fi
 # =============================================================================
 step "5" "Verifica codice progetto in ${PROJECT_DIR}"
 
-if [[ -f "${PROJECT_DIR}/docker-compose.yml" ]]; then
-    ok "Codice già presente in ${PROJECT_DIR}."
+if is_done "step-5"; then
+    ok "Step già completato — skip."
 else
-    warn "Il codice non è ancora presente in ${PROJECT_DIR}."
-    echo ""
-    echo -e "  ${BOLD}Carica il progetto con uno di questi metodi dalla tua macchina locale:${NC}"
-    echo ""
-    echo -e "  ${CYAN}▶ PowerShell (Windows):${NC}"
-    echo    "    scp -r C:\\CMP\\Personal\\beach root@${VPS_IP}:/opt/"
-    echo ""
-    echo -e "  ${CYAN}▶ Git Bash / WSL / Mac / Linux:${NC}"
-    echo    "    rsync -avz --exclude='.git' --exclude='node_modules' \\"
-    echo    "      --exclude='target' --exclude='.env' \\"
-    echo    "      /path/to/beach/ root@${VPS_IP}:/opt/beach/"
-    echo ""
-    echo -e "  ${YELLOW}  Esegui il comando sopra in un'altra finestra, poi torna qui e premi INVIO.${NC}"
-    pause
+    if [[ -f "${PROJECT_DIR}/docker-compose.yml" ]]; then
+        ok "Codice già presente in ${PROJECT_DIR}."
+        mark_done "step-5"
+    else
+        warn "Il codice non è ancora presente in ${PROJECT_DIR}."
+        echo ""
+        echo -e "  ${BOLD}Carica il progetto con uno di questi metodi dalla tua macchina locale:${NC}"
+        echo ""
+        echo -e "  ${CYAN}▶ PowerShell (Windows):${NC}"
+        echo    "    scp -r C:\\CMP\\Personal\\beach root@${VPS_IP}:/opt/"
+        echo ""
+        echo -e "  ${CYAN}▶ Git Bash / WSL / Mac / Linux:${NC}"
+        echo    "    rsync -avz --exclude='.git' --exclude='node_modules' \\"
+        echo    "      --exclude='target' --exclude='.env' \\"
+        echo    "      /path/to/beach/ root@${VPS_IP}:/opt/beach/"
+        echo ""
+        echo -e "  ${YELLOW}  Esegui il comando in un'altra finestra, poi torna qui e premi INVIO.${NC}"
+        pause
 
-    if [[ ! -f "${PROJECT_DIR}/docker-compose.yml" ]]; then
-        err "docker-compose.yml non trovato in ${PROJECT_DIR}. Verifica il caricamento."
-        echo "  Interrompi lo script (Ctrl+C) e riprova dopo aver caricato il codice."
-        exit 1
+        if [[ ! -f "${PROJECT_DIR}/docker-compose.yml" ]]; then
+            err "docker-compose.yml non trovato in ${PROJECT_DIR}. Verifica il caricamento."
+            err "Rilancia lo script dopo aver caricato il codice — questo step verrà riproposto."
+            exit 1
+        fi
+        mark_done "step-5"
     fi
+    ok "Struttura progetto:"
+    ls "${PROJECT_DIR}/" | sed 's/^/    /'
 fi
-
-ok "Struttura progetto:"
-ls "${PROJECT_DIR}/" | sed 's/^/    /'
 
 # =============================================================================
 #  STEP 6 — Configurazione .env
 # =============================================================================
 step "6" "Configurazione file .env"
 
-cd "${PROJECT_DIR}"
-
-if [[ -f .env ]]; then
-    warn ".env già esistente."
-    if ! confirm "Sovrascrivere il .env esistente con i valori inseriti?"; then
-        info ".env conservato. Salta la scrittura."
-    else
-        _write_env=true
-    fi
+if is_done "step-6"; then
+    ok "Step già completato — skip."
 else
-    _write_env=true
-fi
-
-if [[ "${_write_env:-false}" == "true" ]]; then
-    # Copia dal template se esiste, altrimenti crea da zero
+    cd "${PROJECT_DIR}"
     [[ -f .env.example ]] && cp .env.example .env
 
     cat > .env << ENVEOF
@@ -301,11 +372,8 @@ ENVEOF
 
     chmod 600 .env
     ok ".env creato con permessi 600."
-
-    if [[ -z "${PAYPAL_CLIENT_ID}" ]]; then
-        warn "PayPal non configurato. Modifica .env prima di avviare i container:"
-        info "  nano ${PROJECT_DIR}/.env"
-    fi
+    [[ -z "${PAYPAL_CLIENT_ID}" ]] && warn "PayPal non configurato: modifica .env prima della build."
+    mark_done "step-6"
 fi
 
 # =============================================================================
@@ -313,14 +381,15 @@ fi
 # =============================================================================
 step "7" "Configurazione Nginx Virtual Hosts"
 
-if confirm "Creare le configurazioni Nginx per i 4 siti?"; then
+if is_done "step-7"; then
+    ok "Step già completato — skip."
+else
+    if confirm "Creare le configurazioni Nginx per i 4 siti?"; then
 
-    # 7.1 — Landing Page
-    cat > /etc/nginx/sites-available/beach-landing << EOF
+        cat > /etc/nginx/sites-available/beach-landing << EOF
 server {
     listen 80;
     server_name ${BASE_DOMAIN};
-
     location / {
         proxy_pass         http://127.0.0.1:8080;
         proxy_set_header   Host              \$host;
@@ -331,12 +400,10 @@ server {
 }
 EOF
 
-    # 7.2 — BeachBooking
-    cat > /etc/nginx/sites-available/beachbooking << EOF
+        cat > /etc/nginx/sites-available/beachbooking << EOF
 server {
     listen 80;
     server_name booking.${BASE_DOMAIN};
-
     location / {
         proxy_pass         http://127.0.0.1:82;
         proxy_set_header   Host              \$host;
@@ -347,12 +414,10 @@ server {
 }
 EOF
 
-    # 7.3 — BeachDelivery Frontend
-    cat > /etc/nginx/sites-available/beachdelivery << EOF
+        cat > /etc/nginx/sites-available/beachdelivery << EOF
 server {
     listen 80;
     server_name delivery.${BASE_DOMAIN};
-
     location / {
         proxy_pass         http://127.0.0.1:81;
         proxy_set_header   Host              \$host;
@@ -363,15 +428,12 @@ server {
 }
 EOF
 
-    # 7.4 — BeachDelivery API
-    cat > /etc/nginx/sites-available/beachdelivery-api << EOF
+        cat > /etc/nginx/sites-available/beachdelivery-api << EOF
 server {
     listen 80;
     server_name api-delivery.${BASE_DOMAIN};
-
     proxy_read_timeout 300;
     proxy_send_timeout 300;
-
     location / {
         proxy_pass         http://127.0.0.1:8081;
         proxy_http_version 1.1;
@@ -385,88 +447,80 @@ server {
 }
 EOF
 
-    # Abilita siti — evita errore se il symlink esiste già
-    for site in beach-landing beachbooking beachdelivery beachdelivery-api; do
-        ln -sf /etc/nginx/sites-available/${site} /etc/nginx/sites-enabled/${site}
-    done
+        for site in beach-landing beachbooking beachdelivery beachdelivery-api; do
+            ln -sf /etc/nginx/sites-available/${site} /etc/nginx/sites-enabled/${site}
+        done
+        rm -f /etc/nginx/sites-enabled/default
 
-    # Rimuovi default
-    rm -f /etc/nginx/sites-enabled/default
-
-    # Test configurazione
-    if nginx -t 2>&1; then
-        systemctl reload nginx
-        ok "Nginx configurato e ricaricato."
+        if nginx -t 2>&1; then
+            systemctl reload nginx
+            ok "Nginx configurato e ricaricato."
+            mark_done "step-7"
+        else
+            err "Configurazione Nginx non valida. Correggila e rilancia lo script."
+            exit 1
+        fi
     else
-        err "Configurazione Nginx non valida. Controlla i file in /etc/nginx/sites-available/"
-        exit 1
+        warn "Step saltato manualmente."
     fi
-else
-    warn "Step saltato."
 fi
 
 # =============================================================================
-#  STEP 8 — Certificati SSL (Let's Encrypt)
+#  STEP 8 — Certificati SSL
 # =============================================================================
 step "8" "Certificati SSL — Let's Encrypt"
 
-echo -e "  ${CYAN}Prerequisito:${NC} i 4 domini devono rispondere con l'IP ${VPS_IP}."
-echo -e "  Con sslip.io è automatico — nessuna configurazione DNS necessaria."
-echo ""
-info "Test DNS preventivo…"
-
-dns_ok=true
-for subdomain in "" "booking." "delivery." "api-delivery."; do
-    domain="${subdomain}${BASE_DOMAIN}"
-    resolved=$(getent hosts "$domain" 2>/dev/null | awk '{print $1}' | head -1 || true)
-    if [[ "$resolved" == "$VPS_IP" ]]; then
-        ok "  $domain → $resolved"
-    else
-        warn "  $domain → '${resolved:-non risolto}' (atteso: ${VPS_IP})"
-        dns_ok=false
-    fi
-done
-
-if [[ "$dns_ok" == "false" ]]; then
-    warn "Alcuni domini non risolvono correttamente."
-    warn "Certbot fallirà se i domini non sono raggiungibili dalla rete."
-    if ! confirm "Continuare comunque con Certbot?"; then
-        info "Step SSL saltato. Esegui manualmente dopo:"
-        echo "  certbot --nginx \\"
-        echo "    -d ${BASE_DOMAIN} \\"
-        echo "    -d booking.${BASE_DOMAIN} \\"
-        echo "    -d delivery.${BASE_DOMAIN} \\"
-        echo "    -d api-delivery.${BASE_DOMAIN} \\"
-        echo "    --non-interactive --agree-tos --email ${CERTBOT_EMAIL} --redirect"
-        pause
-    fi
-fi
-
-if confirm "Richiedere i certificati SSL con Certbot?"; then
-    certbot --nginx \
-        -d "${BASE_DOMAIN}" \
-        -d "booking.${BASE_DOMAIN}" \
-        -d "delivery.${BASE_DOMAIN}" \
-        -d "api-delivery.${BASE_DOMAIN}" \
-        --non-interactive \
-        --agree-tos \
-        --email "${CERTBOT_EMAIL}" \
-        --redirect
-
-    ok "Certificati SSL ottenuti e Nginx aggiornato con HTTPS."
-
-    # Verifica rinnovo automatico
-    info "Verifica timer rinnovo automatico…"
-    if systemctl is-active --quiet certbot.timer 2>/dev/null; then
-        ok "certbot.timer attivo — rinnovo automatico configurato."
-    else
-        warn "certbot.timer non attivo. Attivazione manuale…"
-        systemctl enable certbot.timer --quiet
-        systemctl start certbot.timer
-        ok "certbot.timer abilitato."
-    fi
+if is_done "step-8"; then
+    ok "Step già completato — skip."
 else
-    warn "Step SSL saltato. I siti funzioneranno solo in HTTP."
+    echo -e "  ${CYAN}Prerequisito:${NC} i 4 domini devono rispondere con l'IP ${VPS_IP}."
+    echo -e "  Con sslip.io è automatico — nessuna configurazione DNS necessaria."
+    echo ""
+    info "Test DNS preventivo…"
+
+    dns_ok=true
+    for subdomain in "" "booking." "delivery." "api-delivery."; do
+        domain="${subdomain}${BASE_DOMAIN}"
+        resolved=$(getent hosts "$domain" 2>/dev/null | awk '{print $1}' | head -1 || true)
+        if [[ "$resolved" == "$VPS_IP" ]]; then
+            ok "  $domain → $resolved"
+        else
+            warn "  $domain → '${resolved:-non risolto}' (atteso: ${VPS_IP})"
+            dns_ok=false
+        fi
+    done
+
+    if [[ "$dns_ok" == "false" ]]; then
+        warn "Alcuni domini non risolvono correttamente."
+        if ! confirm "Continuare comunque con Certbot?"; then
+            info "Step SSL rimandato. Rilancia lo script quando il DNS è pronto."
+            info "Questo step verrà riproposto alla prossima esecuzione."
+            exit 0
+        fi
+    fi
+
+    if confirm "Richiedere i certificati SSL con Certbot?"; then
+        certbot --nginx \
+            -d "${BASE_DOMAIN}" \
+            -d "booking.${BASE_DOMAIN}" \
+            -d "delivery.${BASE_DOMAIN}" \
+            -d "api-delivery.${BASE_DOMAIN}" \
+            --non-interactive \
+            --agree-tos \
+            --email "${CERTBOT_EMAIL}" \
+            --redirect
+
+        ok "Certificati SSL ottenuti."
+
+        if ! systemctl is-active --quiet certbot.timer 2>/dev/null; then
+            systemctl enable certbot.timer --quiet
+            systemctl start certbot.timer
+        fi
+        ok "certbot.timer attivo — rinnovo automatico configurato."
+        mark_done "step-8"
+    else
+        warn "Step SSL saltato manualmente."
+    fi
 fi
 
 # =============================================================================
@@ -474,44 +528,50 @@ fi
 # =============================================================================
 step "9" "Build e avvio container Docker"
 
-echo -e "  ${YELLOW}⚠  La build completa può richiedere 5–15 minuti.${NC}"
-echo -e "  Vengono compilati: Java (Maven) + Node.js (Vite) per ogni servizio.\n"
-
-if confirm "Avviare la build e il deploy dei container?"; then
-    cd "${PROJECT_DIR}"
-
-    info "Avvio build Docker Compose (output in tempo reale)…"
-    echo -e "${CYAN}─────────────────────────────────────────────────────${NC}"
-    docker compose up -d --build
-    echo -e "${CYAN}─────────────────────────────────────────────────────${NC}"
-
-    ok "Build completata. Attendo 10 secondi per l'avvio dei servizi…"
-    sleep 10
-
-    echo ""
-    info "Stato dei container:"
-    docker compose ps
+if is_done "step-9"; then
+    ok "Step già completato — skip."
+    info "Stato attuale dei container:"
+    cd "${PROJECT_DIR}" && docker compose ps
 else
-    warn "Step saltato. Avvia manualmente con:"
-    echo "  cd ${PROJECT_DIR} && docker compose up -d --build"
+    echo -e "  ${YELLOW}⚠  La build completa può richiedere 5–15 minuti.${NC}"
+    echo -e "  Vengono compilati: Java (Maven) + Node.js (Vite) per ogni servizio.\n"
+
+    if confirm "Avviare la build e il deploy dei container?"; then
+        cd "${PROJECT_DIR}"
+        info "Avvio build Docker Compose…"
+        echo -e "${CYAN}─────────────────────────────────────────────────────${NC}"
+        docker compose up -d --build
+        echo -e "${CYAN}─────────────────────────────────────────────────────${NC}"
+        ok "Build completata. Attendo 10 secondi per l'avvio dei servizi…"
+        sleep 10
+        echo ""
+        info "Stato dei container:"
+        docker compose ps
+        mark_done "step-9"
+    else
+        warn "Step saltato manualmente. Avvia con:"
+        echo "  cd ${PROJECT_DIR} && docker compose up -d --build"
+    fi
 fi
 
 # =============================================================================
-#  STEP 10 — Configurazione backup automatico
+#  STEP 10 — Backup automatico
 # =============================================================================
 step "10" "Backup automatico giornaliero (cron)"
 
-if confirm "Configurare il backup automatico del database ogni notte alle 3:00?"; then
-    mkdir -p "${PROJECT_DIR}/backups"
-
-    # Rimuove vecchia riga backup se presente, poi aggiunge la nuova
-    (crontab -l 2>/dev/null | grep -v "beach/backups"; \
-     echo "0 3 * * * docker exec beach-mysql mysqldump -u root -p\"\$(grep MYSQL_ROOT_PASSWORD ${PROJECT_DIR}/.env | cut -d= -f2)\" --all-databases --single-transaction > ${PROJECT_DIR}/backups/backup_\$(date +\\%Y\\%m\\%d).sql && find ${PROJECT_DIR}/backups -name '*.sql' -mtime +7 -delete") \
-    | crontab -
-
-    ok "Cron configurato: backup ogni giorno alle 03:00, rotazione 7 giorni."
+if is_done "step-10"; then
+    ok "Step già completato — skip."
 else
-    warn "Backup automatico non configurato."
+    if confirm "Configurare il backup automatico del database ogni notte alle 3:00?"; then
+        mkdir -p "${PROJECT_DIR}/backups"
+        (crontab -l 2>/dev/null | grep -v "beach/backups"
+         echo "0 3 * * * docker exec beach-mysql mysqldump -u root -p\"\$(grep MYSQL_ROOT_PASSWORD ${PROJECT_DIR}/.env | cut -d= -f2)\" --all-databases --single-transaction > ${PROJECT_DIR}/backups/backup_\$(date +\\%Y\\%m\\%d).sql && find ${PROJECT_DIR}/backups -name '*.sql' -mtime +7 -delete") \
+        | crontab -
+        ok "Cron configurato: backup ogni giorno alle 03:00, rotazione 7 giorni."
+        mark_done "step-10"
+    else
+        warn "Backup automatico non configurato."
+    fi
 fi
 
 # =============================================================================
@@ -526,21 +586,21 @@ echo ""
 all_ok=true
 
 check_url() {
-    local label="$1" url="$2" expected="$3"
+    local label="$1" url="$2"
     local code
     code=$(curl -sk -o /dev/null -w "%{http_code}" --max-time 10 "$url" 2>/dev/null || echo "000")
-    if [[ "$code" == "$expected" || ( "$expected" == "2xx" && "$code" =~ ^2 ) ]]; then
+    if [[ "$code" =~ ^2 ]]; then
         ok "${label} → ${url} [HTTP ${code}]"
     else
-        warn "${label} → ${url} [HTTP ${code}] (atteso: ${expected})"
+        warn "${label} → ${url} [HTTP ${code}]"
         all_ok=false
     fi
 }
 
-check_url "Landing Page   " "https://${BASE_DOMAIN}"                                "2xx"
-check_url "BeachBooking   " "https://booking.${BASE_DOMAIN}"                        "2xx"
-check_url "BeachDelivery  " "https://delivery.${BASE_DOMAIN}"                       "2xx"
-check_url "Delivery API   " "https://api-delivery.${BASE_DOMAIN}/actuator/health"   "2xx"
+check_url "Landing Page   " "https://${BASE_DOMAIN}"
+check_url "BeachBooking   " "https://booking.${BASE_DOMAIN}"
+check_url "BeachDelivery  " "https://delivery.${BASE_DOMAIN}"
+check_url "Delivery API   " "https://api-delivery.${BASE_DOMAIN}/actuator/health"
 
 echo ""
 
@@ -553,13 +613,14 @@ if [[ "$all_ok" == "true" ]]; then
   ╚════════════════════════════════════════════════════╝
 SUCCESS
     echo -e "${NC}"
+    mark_done "step-11"
 else
     echo -e "${YELLOW}${BOLD}"
     cat << 'PARTIAL'
 
   ╔════════════════════════════════════════════════════╗
-  ║   ⚠   Installazione completata con avvertenze.    ║
-  ║   Alcuni servizi potrebbero non essere ancora up. ║
+  ║   ⚠   Alcuni servizi non sono ancora raggiungibili║
+  ║   Rilancia lo script per ritentare la verifica.   ║
   ╚════════════════════════════════════════════════════╝
 PARTIAL
     echo -e "${NC}"
@@ -582,7 +643,6 @@ echo ""
 if [[ -z "${PAYPAL_CLIENT_ID}" ]]; then
     echo -e "  ${YELLOW}⚠  Ricordati di configurare le credenziali PayPal in:${NC}"
     echo    "     nano ${PROJECT_DIR}/.env"
-    echo    "     → PAYPAL_CLIENT_ID e PAYPAL_CLIENT_SECRET"
     echo    "  Poi riavvia: docker compose up -d --build beachbooking-frontend beachbooking-app"
     echo ""
 fi
@@ -632,7 +692,7 @@ cat > "${SUMMARY_FILE}" << SUMMARYEOF
   BeachDelivery JWT Secret:
     ${BD_JWT}
 
-── PAYPAL ───────────────────────────────────────────────────────────────────────
+── PAYPAL ────────────────────────────────────────────────────────────────────────
 
   Client ID      : ${PAYPAL_CLIENT_ID:-[NON CONFIGURATO — aggiornare .env]}
   Client Secret  : ${PAYPAL_CLIENT_SECRET:-[NON CONFIGURATO — aggiornare .env]}
@@ -659,8 +719,10 @@ cat > "${SUMMARY_FILE}" << SUMMARYEOF
   Backup DB      : ${PROJECT_DIR}/backups/
   Nginx sites    : /etc/nginx/sites-available/
   Certificati    : /etc/letsencrypt/live/
+  State file     : ${STATE_FILE}
+  Config cache   : ${CONFIG_CACHE}
 
-── DOCKER ───────────────────────────────────────────────────────────────────────
+── DOCKER ────────────────────────────────────────────────────────────────────────
 
   Landing        : 127.0.0.1:8080  (container: beach-landing)
   BB Frontend    : 127.0.0.1:82    (container: beachbooking-frontend)
@@ -702,5 +764,4 @@ echo -e "\n  ${YELLOW}Scarica il file in locale con:${NC}"
 echo -e "  ${BOLD}  scp root@${VPS_IP}:${SUMMARY_FILE} ./INSTALL-SUMMARY.txt${NC}"
 echo -e "\n  ${RED}  Poi cancellalo dalla VPS:${NC}"
 echo -e "  ${BOLD}  rm -f ${SUMMARY_FILE}${NC}\n"
-
-echo -e "  ${CYAN}Log dell'installazione completato.${NC}"
+echo -e "  ${CYAN}Installazione completata.${NC}"
