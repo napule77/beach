@@ -3,30 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0077b6" />
+  <meta name="theme-color" content="#1a3a4a" />
   <link rel="manifest" href="/manifest.webmanifest" />
-  <title>Beach Platform — La tua estate digitale</title>
-  <meta name="description" content="Prenota il tuo ombrellone e ordina cibo e bevande direttamente sulla spiaggia. La piattaforma digitale completa per il tuo stabilimento balneare." />
+  <title>Beach Platform — Vivi la Spiaggia Senza Pensieri</title>
+  <meta name="description" content="Prenota il tuo ombrellone con un click e ordina cibo e bevande direttamente al tuo posto. La tua estate perfetta inizia qui." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --sea:      #0077b6;
-      --sea-dark: #023e8a;
-      --sea-mid:  #0096c7;
-      --foam:     #90e0ef;
-      --sand:     #fdf0d5;
-      --sand-dark:#f4c97c;
-      --sun:      #f9c74f;
-      --coral:    #f94144;
-      --text:     #1a1a2e;
-      --muted:    #5a6a7e;
-      --white:    #ffffff;
-      --radius:   1.25rem;
-      --shadow:   0 8px 40px rgba(0,119,182,.18);
+      --ocean: #1a3a4a;
+      --ocean-light: #2a5a6a;
+      --sand: #f5ebe0;
+      --sand-light: #faf7f2;
+      --coral: #e07a5f;
+      --coral-dark: #c9694f;
+      --gold: #d4a373;
+      --white: #ffffff;
+      --text: #1a1a2e;
+      --text-light: #6b7280;
+      --radius: 1rem;
+      --shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      --shadow-sm: 0 10px 30px rgba(0,0,0,0.12);
     }
 
     html { scroll-behavior: smooth; }
@@ -38,638 +38,1113 @@
       overflow-x: hidden;
     }
 
+    /* Typography */
+    .font-display { font-family: 'Playfair Display', serif; }
+
     /* ── NAVBAR ─────────────────────────────────────────────── */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
-      padding: .9rem 2rem;
-      background: rgba(255,255,255,.85);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(0,119,182,.1);
+      padding: 1rem 2.5rem;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(20px);
+      transition: all .3s;
+    }
+    nav.scrolled {
+      padding: .75rem 2.5rem;
+      box-shadow: 0 4px 30px rgba(0,0,0,.08);
     }
     .nav-logo {
-      display: flex; align-items: center; gap: .55rem;
-      font-weight: 800; font-size: 1.15rem; color: var(--sea-dark);
+      display: flex; align-items: center; gap: .75rem;
       text-decoration: none;
     }
-    .nav-logo svg { width: 32px; height: 32px; }
-    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-    .nav-links a {
-      text-decoration: none; font-size: .92rem; font-weight: 500; color: var(--muted);
-      transition: color .2s;
+    .logo-mark {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--ocean) 0%, var(--ocean-light) 100%);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
     }
-    .nav-links a:hover { color: var(--sea); }
+    .logo-mark::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(to top, var(--sand) 0%, transparent 100%);
+      opacity: 0.3;
+    }
+    .logo-icon {
+      position: relative;
+      z-index: 1;
+    }
+    .logo-text {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .logo-text span:first-child {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--ocean);
+      line-height: 1.1;
+    }
+    .logo-text span:last-child {
+      font-size: .7rem;
+      font-weight: 500;
+      color: var(--text-light);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .nav-links { display: flex; gap: 2.5rem; align-items: center; }
+    .nav-links a {
+      text-decoration: none; font-size: .9rem; font-weight: 500; color: var(--text-light);
+      transition: color .2s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 0; height: 2px;
+      background: var(--coral);
+      transition: width .3s;
+    }
+    .nav-links a:hover { color: var(--ocean); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta {
+      background: var(--ocean);
+      color: var(--white) !important;
+      padding: .75rem 1.75rem;
+      border-radius: 50px;
+      font-weight: 600 !important;
+    }
+    .nav-cta:hover { background: var(--ocean-light); }
+    .nav-cta::after { display: none !important; }
+
+    .menu-toggle { display: none; background: none; border: none; cursor: pointer; padding: .5rem; }
 
     /* ── HERO ───────────────────────────────────────────────── */
     .hero {
       min-height: 100vh;
-      background: linear-gradient(160deg, var(--sea-dark) 0%, var(--sea-mid) 50%, var(--foam) 100%);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 7rem 1.5rem 10rem;
-      position: relative; overflow: hidden;
+      position: relative;
+      display: flex; align-items: center;
+      padding: 8rem 2.5rem 6rem;
+      overflow: hidden;
     }
-
-    /* Floating bubbles */
-    .bubbles { position: absolute; inset: 0; pointer-events: none; }
-    .bubble {
-      position: absolute; border-radius: 50%;
-      background: rgba(255,255,255,.08);
-      animation: rise linear infinite;
+    .hero-bg {
+      position: absolute; inset: 0;
+      z-index: -1;
     }
-    @keyframes rise {
-      0%   { transform: translateY(100vh) scale(.5); opacity: 0; }
-      10%  { opacity: 1; }
-      90%  { opacity: .6; }
-      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+    .hero-bg img {
+      width: 100%; height: 100%;
+      object-fit: cover;
     }
-
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(26,58,74,.85) 0%, rgba(26,58,74,.4) 60%, transparent 100%);
+    }
+    .hero-content {
+      max-width: 700px;
+      position: relative;
+      z-index: 1;
+    }
     .hero-badge {
-      display: inline-flex; align-items: center; gap: .4rem;
-      background: rgba(255,255,255,.18); color: var(--white);
-      border: 1px solid rgba(255,255,255,.3);
-      border-radius: 2rem; padding: .35rem 1rem;
-      font-size: .82rem; font-weight: 600; letter-spacing: .05em;
-      text-transform: uppercase; margin-bottom: 1.8rem;
-      backdrop-filter: blur(6px);
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(255,255,255,.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.2);
+      padding: .5rem 1.25rem;
+      border-radius: 50px;
+      font-size: .85rem;
+      font-weight: 500;
+      color: var(--white);
+      margin-bottom: 1.5rem;
     }
-
+    .hero-badge-dot {
+      width: 8px; height: 8px;
+      background: var(--coral);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(1.2); }
+    }
     .hero h1 {
-      font-size: clamp(2.4rem, 6vw, 4.2rem);
-      font-weight: 900; color: var(--white);
-      line-height: 1.1; margin-bottom: 1.4rem;
-      text-shadow: 0 2px 20px rgba(0,0,0,.2);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 6vw, 4.5rem);
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
     }
-    .hero h1 span {
-      background: linear-gradient(90deg, var(--sun), var(--sand-dark));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    .hero h1 .highlight {
+      color: var(--gold);
+      font-style: italic;
     }
-
     .hero p {
-      max-width: 560px; font-size: 1.15rem; color: rgba(255,255,255,.88);
-      line-height: 1.7; margin-bottom: 2.5rem;
+      font-size: 1.2rem;
+      color: rgba(255,255,255,.9);
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+      max-width: 540px;
     }
-
     .hero-ctas {
-      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      display: flex; gap: 1rem; flex-wrap: wrap;
     }
     .btn {
-      display: inline-flex; align-items: center; gap: .5rem;
-      padding: .85rem 2rem; border-radius: 3rem;
-      font-size: 1rem; font-weight: 700; text-decoration: none;
-      transition: transform .18s, box-shadow .18s;
+      display: inline-flex; align-items: center; gap: .6rem;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-size: 1rem; font-weight: 600;
+      text-decoration: none;
+      transition: all .25s;
       cursor: pointer; border: none;
     }
     .btn:hover { transform: translateY(-3px); }
     .btn-primary {
-      background: var(--white); color: var(--sea-dark);
-      box-shadow: 0 4px 24px rgba(0,0,0,.18);
+      background: var(--coral);
+      color: var(--white);
+      box-shadow: 0 10px 30px rgba(224,122,95,.4);
     }
-    .btn-primary:hover { box-shadow: 0 8px 32px rgba(0,0,0,.24); }
-    .btn-outline {
-      background: transparent; color: var(--white);
-      border: 2px solid rgba(255,255,255,.5);
-      backdrop-filter: blur(4px);
+    .btn-primary:hover { 
+      background: var(--coral-dark);
+      box-shadow: 0 15px 40px rgba(224,122,95,.5);
     }
-    .btn-outline:hover { background: rgba(255,255,255,.15); }
-
-    /* Wave separator */
-    .wave {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      line-height: 0; overflow: hidden;
-    }
-    .wave svg { display: block; width: 100%; }
-
-    /* ── STATS BAR ──────────────────────────────────────────── */
-    .stats {
+    .btn-secondary {
       background: var(--white);
-      display: flex; justify-content: center; flex-wrap: wrap; gap: 0;
-      box-shadow: var(--shadow);
+      color: var(--ocean);
     }
-    .stat {
-      flex: 1; min-width: 160px; max-width: 260px;
-      display: flex; flex-direction: column; align-items: center;
-      padding: 2rem 1.5rem;
-      border-right: 1px solid #f0f4f8;
+    .btn-secondary:hover { 
+      box-shadow: 0 15px 40px rgba(255,255,255,.3);
     }
-    .stat:last-child { border-right: none; }
-    .stat-num {
-      font-size: 2.2rem; font-weight: 900; color: var(--sea);
-      line-height: 1;
-    }
-    .stat-label { font-size: .84rem; color: var(--muted); margin-top: .4rem; }
 
-    /* ── SECTION SHARED ─────────────────────────────────────── */
-    section { padding: 6rem 1.5rem; }
-    .section-label {
-      display: inline-block;
-      font-size: .78rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--sea); margin-bottom: .8rem;
+    .scroll-indicator {
+      position: absolute;
+      bottom: 3rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: .5rem;
+      color: rgba(255,255,255,.6);
+      font-size: .8rem;
+      animation: bounce 2s infinite;
     }
-    .section-title {
-      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-      font-weight: 800; line-height: 1.15; margin-bottom: 1rem;
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
     }
-    .section-sub {
-      font-size: 1.05rem; color: var(--muted);
-      max-width: 560px; line-height: 1.7; margin-bottom: 3rem;
-    }
-    .container { max-width: 1160px; margin: 0 auto; }
 
-    /* ── APPS SECTION ───────────────────────────────────────── */
-    .apps-section { background: #f7fbff; }
-    .apps-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    /* ── BENEFITS BAR ──────────────────────────────────────── */
+    .benefits {
+      background: var(--sand-light);
+      padding: 4rem 2.5rem;
+    }
+    .benefits-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 2rem;
     }
-
-    /* ── APP CARD ───────────────────────────────────────────── */
-    .app-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      display: flex; flex-direction: column;
-      transition: transform .22s, box-shadow .22s;
+    .benefit-item {
+      text-align: center;
+      padding: 1.5rem;
     }
-    .app-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,119,182,.22); }
-
-    .app-card-header {
-      padding: 2.5rem 2.5rem 2rem;
-      position: relative; overflow: hidden;
-    }
-    .card-booking .app-card-header {
-      background: linear-gradient(135deg, var(--sea-dark) 0%, var(--sea-mid) 100%);
-    }
-    .card-delivery .app-card-header {
-      background: linear-gradient(135deg, #d62828 0%, #f77f00 100%);
-    }
-
-    /* Decorative circles in header */
-    .app-card-header::before, .app-card-header::after {
-      content: ''; position: absolute; border-radius: 50%;
-      background: rgba(255,255,255,.07);
-    }
-    .app-card-header::before { width: 200px; height: 200px; right: -60px; top: -60px; }
-    .app-card-header::after  { width: 120px; height: 120px; right: 40px; bottom: -40px; }
-
-    .app-icon {
+    .benefit-icon {
       width: 64px; height: 64px;
-      background: rgba(255,255,255,.18);
-      border-radius: 1.2rem;
+      margin: 0 auto 1rem;
+      background: var(--white);
+      border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 1.2rem; backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,.25);
-      position: relative; z-index: 1;
+      box-shadow: var(--shadow-sm);
     }
-    .app-icon svg { width: 34px; height: 34px; }
+    .benefit-icon svg {
+      width: 32px; height: 32px;
+      color: var(--coral);
+    }
+    .benefit-item h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ocean);
+      margin-bottom: .5rem;
+    }
+    .benefit-item p {
+      font-size: .9rem;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
 
-    .app-tag {
+    /* ── SECTION SHARED ─────────────────────────────────────── */
+    section { padding: 7rem 2.5rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .section-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 4rem;
+    }
+    .section-label {
       display: inline-block;
-      background: rgba(255,255,255,.2);
-      color: rgba(255,255,255,.95);
-      border-radius: 2rem; padding: .2rem .75rem;
-      font-size: .74rem; font-weight: 600; letter-spacing: .06em;
-      text-transform: uppercase; margin-bottom: .75rem;
-      position: relative; z-index: 1;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--coral);
+      margin-bottom: 1rem;
     }
-    .app-card-header h2 {
-      font-size: 1.65rem; font-weight: 800; color: var(--white);
-      line-height: 1.2; margin-bottom: .5rem;
-      position: relative; z-index: 1;
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--ocean);
+      margin-bottom: 1rem;
     }
-    .app-card-header p {
-      font-size: .97rem; color: rgba(255,255,255,.85);
-      line-height: 1.6; position: relative; z-index: 1;
+    .section-sub {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      line-height: 1.7;
     }
 
-    .app-card-body { padding: 2rem 2.5rem; flex: 1; }
+    /* ── SERVICES SECTION ───────────────────────────────────── */
+    .services-section { background: var(--white); }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3rem;
+    }
+    .service-card {
+      border-radius: 24px;
+      overflow: hidden;
+      background: var(--white);
+      box-shadow: var(--shadow);
+      transition: transform .3s, box-shadow .3s;
+    }
+    .service-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 35px 60px -15px rgba(0,0,0,0.3);
+    }
+    .service-image {
+      height: 280px;
+      overflow: hidden;
+      position: relative;
+    }
+    .service-image img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform .4s;
+    }
+    .service-card:hover .service-image img {
+      transform: scale(1.05);
+    }
+    .service-image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(26,58,74,.8) 0%, transparent 60%);
+    }
+    .service-tag {
+      position: absolute;
+      top: 1.5rem; left: 1.5rem;
+      background: var(--coral);
+      color: var(--white);
+      padding: .5rem 1rem;
+      border-radius: 50px;
+      font-size: .8rem;
+      font-weight: 600;
+    }
+    .service-content {
+      padding: 2rem;
+    }
+    .service-content h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--ocean);
+      margin-bottom: 1rem;
+    }
+    .service-content p {
+      font-size: 1rem;
+      color: var(--text-light);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    .service-features {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+      margin-bottom: 1.5rem;
+    }
+    .service-features li {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .9rem;
+      color: var(--text);
+      background: var(--sand-light);
+      padding: .5rem 1rem;
+      border-radius: 50px;
+    }
+    .service-features li svg {
+      width: 16px; height: 16px;
+      color: var(--coral);
+    }
+    .service-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 600;
+      color: var(--ocean);
+      text-decoration: none;
+      transition: gap .3s;
+    }
+    .service-link:hover { gap: .75rem; }
+    .service-link svg {
+      width: 20px; height: 20px;
+    }
 
-    .feature-list {
-      list-style: none; display: flex; flex-direction: column; gap: .75rem;
+    /* ── VIDEO SECTION ──────────────────────────────────────── */
+    .video-section {
+      background: var(--ocean);
+      position: relative;
+      overflow: hidden;
+    }
+    .video-section::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,.03) 0%, transparent 70%);
+    }
+    .video-section .section-label { color: var(--gold); }
+    .video-section .section-title { color: var(--white); }
+    .video-section .section-sub { color: rgba(255,255,255,.7); }
+    .video-wrapper {
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,.4);
+    }
+    .video-thumbnail {
+      position: relative;
+      aspect-ratio: 16/9;
+      cursor: pointer;
+    }
+    .video-thumbnail img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .video-thumbnail-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(26,58,74,.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .3s;
+    }
+    .video-thumbnail:hover .video-thumbnail-overlay {
+      background: rgba(26,58,74,.2);
+    }
+    .play-button {
+      width: 100px; height: 100px;
+      background: var(--coral);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .3s, box-shadow .3s;
+      box-shadow: 0 10px 40px rgba(224,122,95,.5);
+    }
+    .video-thumbnail:hover .play-button {
+      transform: scale(1.1);
+      box-shadow: 0 15px 50px rgba(224,122,95,.6);
+    }
+    .play-button svg {
+      width: 40px; height: 40px;
+      color: var(--white);
+      margin-left: 5px;
+    }
+    .video-frame {
+      display: none;
+      aspect-ratio: 16/9;
+    }
+    .video-frame.active {
+      display: block;
+    }
+    .video-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ── EXPERIENCE SECTION ─────────────────────────────────── */
+    .experience-section {
+      background: var(--sand-light);
+    }
+    .experience-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .experience-image {
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .experience-image img {
+      width: 100%;
+      height: 500px;
+      object-fit: cover;
+    }
+    .experience-content h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--ocean);
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+    .experience-content p {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      line-height: 1.8;
       margin-bottom: 2rem;
     }
-    .feature-list li {
-      display: flex; align-items: flex-start; gap: .75rem;
-      font-size: .95rem; line-height: 1.5; color: var(--text);
+    .experience-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
     }
-    .feature-icon {
-      flex-shrink: 0; width: 28px; height: 28px; border-radius: .55rem;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .95rem; margin-top: .05rem;
+    .experience-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
     }
-    .card-booking .feature-icon { background: #e0f4ff; }
-    .card-delivery .feature-icon { background: #fff0e8; }
-
-    .app-card-footer {
-      padding: 0 2.5rem 2.5rem;
-      display: flex; gap: 1rem; flex-wrap: wrap;
+    .experience-check {
+      width: 28px; height: 28px;
+      background: var(--coral);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
-    .btn-card {
-      flex: 1; min-width: 140px; justify-content: center;
-      padding: .85rem 1.5rem; border-radius: .85rem; font-size: .97rem;
-    }
-    .card-booking .btn-card-main { background: var(--sea); color: var(--white); }
-    .card-booking .btn-card-main:hover { background: var(--sea-dark); }
-    .card-delivery .btn-card-main { background: #f77f00; color: var(--white); }
-    .card-delivery .btn-card-main:hover { background: #d62828; }
-    .btn-card-secondary {
-      background: #f0f6ff; color: var(--sea-dark);
-      border: 1px solid #d8eaf8;
-    }
-    .btn-card-secondary:hover { background: #e0eeff; }
-
-    /* ── HOW IT WORKS ───────────────────────────────────────── */
-    .how-section { background: var(--white); }
-    .how-tabs {
-      display: flex; gap: .5rem; margin-bottom: 3rem;
-      background: #f0f6ff; padding: .4rem;
-      border-radius: .85rem; width: fit-content;
-    }
-    .how-tab {
-      padding: .6rem 1.4rem; border-radius: .65rem;
-      font-size: .92rem; font-weight: 600; cursor: pointer;
-      border: none; background: transparent; color: var(--muted);
-      transition: background .18s, color .18s;
-    }
-    .how-tab.active { background: var(--white); color: var(--sea-dark); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-
-    .how-content { display: none; }
-    .how-content.active { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
-
-    .step-card {
-      background: #f7fbff;
-      border-radius: var(--radius); padding: 1.8rem;
-      position: relative; overflow: hidden;
-    }
-    .step-num {
-      font-size: 4rem; font-weight: 900; line-height: 1;
-      color: #ddeeff; position: absolute; top: .5rem; right: 1rem;
-      user-select: none;
-    }
-    .step-icon {
-      font-size: 1.8rem; margin-bottom: 1rem;
-    }
-    .step-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .5rem; }
-    .step-card p { font-size: .88rem; color: var(--muted); line-height: 1.6; }
-
-    /* ── TECH SECTION ───────────────────────────────────────── */
-    .tech-section {
-      background: linear-gradient(135deg, var(--sea-dark), var(--sea));
+    .experience-check svg {
+      width: 14px; height: 14px;
       color: var(--white);
     }
-    .tech-section .section-label { color: var(--foam); }
-    .tech-section .section-title { color: var(--white); }
-    .tech-section .section-sub { color: rgba(255,255,255,.75); max-width: 100%; }
-    .tech-pills {
-      display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem;
+    .experience-list li span {
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.6;
     }
-    .pill {
-      background: rgba(255,255,255,.1);
-      border: 1px solid rgba(255,255,255,.2);
-      color: var(--white); border-radius: 2rem;
-      padding: .4rem 1rem; font-size: .87rem; font-weight: 500;
-      backdrop-filter: blur(4px);
+
+    /* ── TESTIMONIALS ───────────────────────────────────────── */
+    .testimonials-section { background: var(--white); }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    .testimonial-card {
+      background: var(--sand-light);
+      border-radius: 20px;
+      padding: 2rem;
+      position: relative;
+    }
+    .testimonial-quote {
+      font-size: 3rem;
+      color: var(--coral);
+      opacity: .3;
+      line-height: 1;
+      margin-bottom: .5rem;
+    }
+    .testimonial-text {
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .testimonial-avatar {
+      width: 50px; height: 50px;
+      background: var(--ocean);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .testimonial-info h4 {
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--ocean);
+    }
+    .testimonial-info p {
+      font-size: .85rem;
+      color: var(--text-light);
+    }
+    .testimonial-stars {
+      display: flex;
+      gap: .25rem;
+      margin-top: .5rem;
+    }
+    .testimonial-stars svg {
+      width: 16px; height: 16px;
+      color: var(--gold);
+      fill: var(--gold);
     }
 
     /* ── CTA SECTION ────────────────────────────────────────── */
     .cta-section {
-      background: var(--sand);
+      background: linear-gradient(135deg, var(--ocean) 0%, var(--ocean-light) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      bottom: -20%; right: -10%;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(212,163,115,.2) 0%, transparent 70%);
+    }
+    .cta-content {
       text-align: center;
+      position: relative;
+      z-index: 1;
     }
-    .cta-section .section-title { max-width: 600px; margin: 0 auto 1rem; }
-    .cta-section .section-sub   { margin: 0 auto 2.5rem; }
-    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-    .btn-cta-booking {
-      background: var(--sea); color: var(--white);
-      box-shadow: 0 4px 24px rgba(0,119,182,.35);
+    .cta-content h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 1rem;
     }
-    .btn-cta-booking:hover { background: var(--sea-dark); }
-    .btn-cta-delivery {
-      background: #f77f00; color: var(--white);
-      box-shadow: 0 4px 24px rgba(247,127,0,.35);
+    .cta-content p {
+      font-size: 1.15rem;
+      color: rgba(255,255,255,.8);
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
     }
-    .btn-cta-delivery:hover { background: #d62828; }
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-cta {
+      padding: 1.1rem 2.5rem;
+      font-size: 1rem;
+    }
+    .btn-cta-primary {
+      background: var(--coral);
+      color: var(--white);
+      box-shadow: 0 10px 30px rgba(224,122,95,.4);
+    }
+    .btn-cta-primary:hover {
+      background: var(--coral-dark);
+      box-shadow: 0 15px 40px rgba(224,122,95,.5);
+    }
+    .btn-cta-secondary {
+      background: var(--white);
+      color: var(--ocean);
+    }
 
     /* ── FOOTER ─────────────────────────────────────────────── */
     footer {
-      background: var(--text);
+      background: #0f252f;
       color: rgba(255,255,255,.6);
-      padding: 2.5rem 1.5rem;
-      text-align: center; font-size: .87rem;
+      padding: 4rem 2.5rem 2rem;
     }
-    footer strong { color: rgba(255,255,255,.9); }
-    footer .footer-links {
-      display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
-      margin-top: .8rem;
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
     }
-    footer a { color: rgba(255,255,255,.5); text-decoration: none; transition: color .2s; }
-    footer a:hover { color: var(--foam); }
+    .footer-brand .logo-text span:first-child {
+      color: var(--white);
+    }
+    .footer-brand p {
+      margin-top: 1rem;
+      font-size: .95rem;
+      line-height: 1.7;
+      max-width: 280px;
+    }
+    .footer-column h4 {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 1.5rem;
+    }
+    .footer-column ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+    .footer-column a {
+      color: rgba(255,255,255,.6);
+      text-decoration: none;
+      font-size: .95rem;
+      transition: color .2s;
+    }
+    .footer-column a:hover {
+      color: var(--coral);
+    }
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 3rem auto 0;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: .9rem;
+    }
+    .footer-social {
+      display: flex;
+      gap: 1rem;
+    }
+    .footer-social a {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,.6);
+      transition: all .2s;
+    }
+    .footer-social a:hover {
+      background: var(--coral);
+      color: var(--white);
+    }
 
     /* ── RESPONSIVE ─────────────────────────────────────────── */
-    @media (max-width: 640px) {
-      nav { padding: .8rem 1.2rem; }
-      .nav-links { gap: 1rem; }
-      .apps-grid { grid-template-columns: 1fr; }
-      .app-card-header, .app-card-body, .app-card-footer { padding-left: 1.5rem; padding-right: 1.5rem; }
-      .stat { padding: 1.5rem 1rem; }
+    @media (max-width: 1024px) {
+      .benefits-grid { grid-template-columns: repeat(2, 1fr); }
+      .services-grid { grid-template-columns: 1fr; }
+      .experience-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .footer-content { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      nav { padding: .75rem 1.5rem; }
+      .nav-links { display: none; }
+      .menu-toggle { display: block; }
+      .hero { padding: 7rem 1.5rem 4rem; }
+      .hero h1 { font-size: 2.2rem; }
+      .benefits-grid { grid-template-columns: 1fr; }
+      section { padding: 4rem 1.5rem; }
+      .footer-content { grid-template-columns: 1fr; text-align: center; }
+      .footer-brand p { margin: 1rem auto; }
+      .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+      .footer-social { justify-content: center; }
     }
   </style>
 </head>
 <body>
 
 <!-- ── NAVBAR ─────────────────────────────────────────────────── -->
-<nav>
+<nav id="navbar">
   <a href="#" class="nav-logo">
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#0096c7"/>
-      <!-- umbrella -->
-      <path d="M20 8 C12 8 8 14 8 20 H20 H32 C32 14 28 8 20 8Z" fill="white" opacity=".9"/>
-      <rect x="19.5" y="20" width="1" height="12" rx=".5" fill="white" opacity=".9"/>
-      <path d="M19.5 32 Q17 35 19 35.5 Q21 36 20.5 32" fill="white" opacity=".7"/>
-      <!-- wave -->
-      <path d="M6 28 Q10 25 14 28 Q18 31 22 28 Q26 25 34 28" stroke="#90e0ef" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    </svg>
-    Beach Platform
+    <div class="logo-mark">
+      <svg class="logo-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 3C8.5 3 4 7.5 4 12H14H24C24 7.5 19.5 3 14 3Z" fill="white" opacity=".95"/>
+        <rect x="13.25" y="12" width="1.5" height="11" rx=".75" fill="white" opacity=".95"/>
+        <path d="M13.25 23 Q10.5 25.5 12.5 26 Q14.5 26.5 14.75 23" fill="white" opacity=".8"/>
+        <path d="M4 20 Q8 17.5 12 20 Q16 22.5 20 20 Q24 17.5 24 20" stroke="rgba(245,235,224,.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <span>Beach</span>
+      <span>La tua estate perfetta</span>
+    </div>
   </a>
   <div class="nav-links">
-    <a href="#apps">Le App</a>
-    <a href="#how">Come funziona</a>
-    <a href="#tech">Tech</a>
+    <a href="#servizi">Servizi</a>
+    <a href="#scopri">Scopri</a>
+    <a href="#video">Video</a>
+    <a href="https://booking.80-211-137-54.sslip.io" class="nav-cta" target="_blank">Prenota Ora</a>
   </div>
+  <button class="menu-toggle" aria-label="Menu">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
 </nav>
 
 <!-- ── HERO ──────────────────────────────────────────────────── -->
 <section class="hero">
-  <div class="bubbles" id="bubbles"></div>
-
-  <div class="hero-badge">
-    🌊 La piattaforma digitale per la spiaggia
+  <div class="hero-bg">
+    <img src="/images/hero-beach.jpg" alt="Spiaggia mediterranea" />
+    <div class="hero-overlay"></div>
   </div>
-
-  <h1>La tua estate,<br><span>senza file d'attesa</span></h1>
-
-  <p>
-    Prenota il tuo ombrellone in anticipo e ordina cibo e bevande
-    direttamente al tuo posto. Due app pensate per rendere ogni
-    giornata al mare perfetta.
-  </p>
-
-  <div class="hero-ctas">
-    <a href="https://booking.80-211-137-54.sslip.io" class="btn btn-primary" target="_blank">
-      ⛱ Prenota ombrellone
-    </a>
-    <a href="https://delivery.80-211-137-54.sslip.io" class="btn btn-outline" target="_blank">
-      🍹 Ordina in spiaggia
-    </a>
+  
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Disponibile per la stagione 2025
+    </div>
+    
+    <h1>Vivi la spiaggia <span class="highlight">senza pensieri</span></h1>
+    
+    <p>
+      Prenota il tuo posto al sole con un click e goditi bevande fresche 
+      e piatti deliziosi direttamente sotto il tuo ombrellone. 
+      La vacanza perfetta inizia qui.
+    </p>
+    
+    <div class="hero-ctas">
+      <a href="https://booking.80-211-137-54.sslip.io" class="btn btn-primary" target="_blank">
+        Prenota il tuo ombrellone
+      </a>
+      <a href="#scopri" class="btn btn-secondary">
+        Scopri di piu
+      </a>
+    </div>
   </div>
-
-  <div class="wave">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80">
-      <path fill="#f7fbff" fill-opacity="1"
-        d="M0,40 C180,80 360,0 540,40 C720,80 900,0 1080,40 C1260,80 1380,20 1440,40 L1440,80 L0,80 Z"/>
+  
+  <div class="scroll-indicator">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 5v14M19 12l-7 7-7-7"/>
     </svg>
+    Scorri
   </div>
 </section>
 
-<!-- ── STATS BAR ──────────────────────────────────────────────── -->
-<div class="stats">
-  <div class="stat">
-    <span class="stat-num">2</span>
-    <span class="stat-label">Applicazioni integrate</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num">100%</span>
-    <span class="stat-label">Digitale e senza carta</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num">IT / EN</span>
-    <span class="stat-label">Multilingua</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num">24/7</span>
-    <span class="stat-label">Disponibile sempre</span>
+<!-- ── BENEFITS BAR ───────────────────────────────────────────── -->
+<div class="benefits">
+  <div class="benefits-grid">
+    <div class="benefit-item">
+      <div class="benefit-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <h3>Prenotazione Istantanea</h3>
+      <p>Scegli il tuo posto preferito e prenota in pochi secondi</p>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/>
+          <line x1="16" y1="8" x2="2" y2="22"/>
+          <line x1="17.5" y1="15" x2="9" y2="15"/>
+        </svg>
+      </div>
+      <h3>Menu Gourmet</h3>
+      <p>Piatti freschi e cocktail serviti direttamente al tuo ombrellone</p>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <h3>Zero Attese</h3>
+      <p>Niente code, niente stress. Solo relax sotto il sole</p>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <h3>Pagamenti Sicuri</h3>
+      <p>Transazioni protette per una vacanza in totale tranquillita</p>
+    </div>
   </div>
 </div>
 
-<!-- ── APPS SECTION ───────────────────────────────────────────── -->
-<section class="apps-section" id="apps">
+<!-- ── SERVICES SECTION ───────────────────────────────────────── -->
+<section class="services-section" id="servizi">
   <div class="container">
-    <span class="section-label">Le nostre applicazioni</span>
-    <h2 class="section-title">Due strumenti, un'unica estate perfetta</h2>
-    <p class="section-sub">
-      Ogni piattaforma è pensata per risolvere un problema specifico della
-      gestione balneare — sia dal lato cliente che dall'operatore.
-    </p>
+    <div class="section-header">
+      <span class="section-label">I Nostri Servizi</span>
+      <h2 class="section-title">Tutto cio di cui hai bisogno per la tua estate perfetta</h2>
+      <p class="section-sub">
+        Due servizi pensati per trasformare ogni giornata al mare in un&apos;esperienza indimenticabile
+      </p>
+    </div>
 
-    <div class="apps-grid">
-
-      <!-- ── BEACHBOOKING CARD ─────────────────────────────── -->
-      <div class="app-card card-booking">
-        <div class="app-card-header">
-          <div class="app-icon">
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- umbrella icon -->
-              <path d="M24 6C14 6 8 14 8 22H24H40C40 14 34 6 24 6Z" fill="white" opacity=".95"/>
-              <rect x="23" y="22" width="2" height="18" rx="1" fill="white" opacity=".95"/>
-              <path d="M23 40 Q19 44 22 45 Q25 46 25 40" fill="white" opacity=".8"/>
-            </svg>
-          </div>
-          <span class="app-tag">Prenotazioni</span>
-          <h2>BeachBooking</h2>
-          <p>La piattaforma per prenotare ombrelloni e accessori online, prima di arrivare in spiaggia.</p>
+    <div class="services-grid">
+      <!-- BeachBooking Card -->
+      <div class="service-card">
+        <div class="service-image">
+          <img src="/images/beach-booking.jpg" alt="Prenotazione ombrelloni" />
+          <div class="service-image-overlay"></div>
+          <span class="service-tag">Prenotazioni</span>
         </div>
-
-        <div class="app-card-body">
-          <ul class="feature-list">
+        <div class="service-content">
+          <h3>Prenota il Tuo Posto al Sole</h3>
+          <p>
+            Scegli il tuo ombrellone preferito direttamente dalla mappa interattiva. 
+            Prima fila vista mare o un angolo tranquillo? La scelta e tua.
+          </p>
+          <ul class="service-features">
             <li>
-              <span class="feature-icon">🗺️</span>
-              <span><strong>Mappa interattiva</strong> dello stabilimento con ombrelloni disponibili in tempo reale</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Mappa interattiva
             </li>
             <li>
-              <span class="feature-icon">📅</span>
-              <span><strong>Prenotazione per data</strong> con selezione di fila e posto preciso</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Accessori extra
             </li>
             <li>
-              <span class="feature-icon">🪑</span>
-              <span><strong>Accessori aggiuntivi</strong> — lettini, sdraio, teli e culle baby a noleggio</span>
-            </li>
-            <li>
-              <span class="feature-icon">💳</span>
-              <span><strong>Pagamento online</strong> con PayPal in modo sicuro prima dell'arrivo</span>
-            </li>
-            <li>
-              <span class="feature-icon">📊</span>
-              <span><strong>Dashboard gestore</strong> per configurare prezzi stagionali, layout e disponibilità</span>
-            </li>
-            <li>
-              <span class="feature-icon">🔔</span>
-              <span><strong>Notifiche</strong> di conferma e aggiornamento prenotazione</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Conferma immediata
             </li>
           </ul>
-        </div>
-
-        <div class="app-card-footer">
-          <a href="https://booking.80-211-137-54.sslip.io" class="btn btn-card btn-card-main" target="_blank">
-            Vai a BeachBooking →
+          <a href="https://booking.80-211-137-54.sslip.io" class="service-link" target="_blank">
+            Prenota ora
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
           </a>
         </div>
       </div>
 
-      <!-- ── BEACHDELIVERY CARD ─────────────────────────────── -->
-      <div class="app-card card-delivery">
-        <div class="app-card-header">
-          <div class="app-icon">
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- tray/delivery icon -->
-              <rect x="8" y="28" width="32" height="6" rx="3" fill="white" opacity=".95"/>
-              <ellipse cx="24" cy="20" rx="14" ry="10" fill="white" opacity=".8"/>
-              <circle cx="16" cy="34" r="3" fill="white" opacity=".95"/>
-              <circle cx="32" cy="34" r="3" fill="white" opacity=".95"/>
-              <!-- steam lines -->
-              <path d="M18 16 Q19 13 18 10" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
-              <path d="M24 14 Q25 11 24 8" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
-              <path d="M30 16 Q31 13 30 10" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
-            </svg>
-          </div>
-          <span class="app-tag">Food & Drink Delivery</span>
-          <h2>BeachDelivery</h2>
-          <p>Scansiona il QR code del tuo ombrellone e ricevi cibo e bevande direttamente al tuo posto.</p>
+      <!-- BeachDelivery Card -->
+      <div class="service-card">
+        <div class="service-image">
+          <img src="/images/beach-delivery.jpg" alt="Delivery in spiaggia" />
+          <div class="service-image-overlay"></div>
+          <span class="service-tag">Food & Drinks</span>
         </div>
-
-        <div class="app-card-body">
-          <ul class="feature-list">
+        <div class="service-content">
+          <h3>Gusto Direttamente al Tuo Ombrellone</h3>
+          <p>
+            Scansiona il QR code e sfoglia il menu. Dal fresco aperitivo 
+            al pranzo gourmet, tutto arriva direttamente da te.
+          </p>
+          <ul class="service-features">
             <li>
-              <span class="feature-icon">📱</span>
-              <span><strong>Ordine via QR code</strong> — nessuna app da scaricare, basta la fotocamera</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Menu digitale
             </li>
             <li>
-              <span class="feature-icon">🍕</span>
-              <span><strong>Menu digitale</strong> con categorie, foto, prezzi e info su allergeni</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Consegna veloce
             </li>
             <li>
-              <span class="feature-icon">🎯</span>
-              <span><strong>Tracking in tempo reale</strong> dell'ordine: in preparazione → in consegna → consegnato</span>
-            </li>
-            <li>
-              <span class="feature-icon">💸</span>
-              <span><strong>Promozioni automatiche</strong> — sconti a percentuale o prezzi fissi per categoria</span>
-            </li>
-            <li>
-              <span class="feature-icon">🌍</span>
-              <span><strong>Multilingua IT/EN</strong> — menu e interfaccia in italiano e inglese</span>
-            </li>
-            <li>
-              <span class="feature-icon">👨‍🍳</span>
-              <span><strong>App camerieri</strong> per gestire le consegne e aggiornare gli stati degli ordini</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Ordine in tempo reale
             </li>
           </ul>
-        </div>
-
-        <div class="app-card-footer">
-          <a href="https://delivery.80-211-137-54.sslip.io" class="btn btn-card btn-card-main" target="_blank">
-            Vai a BeachDelivery →
+          <a href="https://delivery.80-211-137-54.sslip.io" class="service-link" target="_blank">
+            Ordina ora
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
           </a>
         </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ── HOW IT WORKS ───────────────────────────────────────────── -->
-<section class="how-section" id="how">
-  <div class="container">
-    <span class="section-label">Come funziona</span>
-    <h2 class="section-title">Semplice per tutti</h2>
-    <p class="section-sub">
-      Che tu sia un cliente in vacanza o il gestore dello stabilimento,
-      ogni flusso è pensato per essere intuitivo e veloce.
-    </p>
-
-    <div class="how-tabs">
-      <button class="how-tab active" data-tab="booking">⛱ BeachBooking</button>
-      <button class="how-tab" data-tab="delivery">🍹 BeachDelivery</button>
-    </div>
-
-    <div class="how-content active" id="tab-booking">
-      <div class="step-card">
-        <span class="step-num">1</span>
-        <div class="step-icon">🔍</div>
-        <h3>Cerca lo stabilimento</h3>
-        <p>Sfoglia i lidi disponibili e scegli la data della tua vacanza.</p>
-      </div>
-      <div class="step-card">
-        <span class="step-num">2</span>
-        <div class="step-icon">🗺️</div>
-        <h3>Scegli l'ombrellone</h3>
-        <p>Visualizza la mappa del lido e seleziona il posto che preferisci — fila e numero.</p>
-      </div>
-      <div class="step-card">
-        <span class="step-num">3</span>
-        <div class="step-icon">🪑</div>
-        <h3>Aggiungi accessori</h3>
-        <p>Aggiungi lettini, sdraio o teli mare. Il prezzo si aggiorna in tempo reale.</p>
-      </div>
-      <div class="step-card">
-        <span class="step-num">4</span>
-        <div class="step-icon">✅</div>
-        <h3>Paga e vai in spiaggia</h3>
-        <p>Pagamento sicuro con PayPal. Arriva in spiaggia e trova il tuo posto già pronto.</p>
-      </div>
-    </div>
-
-    <div class="how-content" id="tab-delivery">
-      <div class="step-card">
-        <span class="step-num">1</span>
-        <div class="step-icon">📷</div>
-        <h3>Scansiona il QR</h3>
-        <p>Sul tuo ombrellone trovi un QR code univoco. Scannerizzalo con la fotocamera.</p>
-      </div>
-      <div class="step-card">
-        <span class="step-num">2</span>
-        <div class="step-icon">🍔</div>
-        <h3>Scegli dal menu</h3>
-        <p>Menu digitale sempre aggiornato con categorie, prezzi e info su allergeni.</p>
-      </div>
-      <div class="step-card">
-        <span class="step-num">3</span>
-        <div class="step-icon">💳</div>
-        <h3>Ordina e paga</h3>
-        <p>Conferma l'ordine e paga con PayPal, carta o contanti alla consegna.</p>
-      </div>
-      <div class="step-card">
-        <span class="step-num">4</span>
-        <div class="step-icon">🚶</div>
-        <h3>Ricevi al posto</h3>
-        <p>Il cameriere porta l'ordine direttamente al tuo ombrellone. Zero attesa al bar.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── TECH SECTION ───────────────────────────────────────────── -->
-<section class="tech-section" id="tech">
+<!-- ── VIDEO SECTION ──────────────────────────────────────────── -->
+<section class="video-section" id="video">
   <div class="container">
-    <span class="section-label">Tecnologia</span>
-    <h2 class="section-title">Stack moderno, performance garantite</h2>
-    <p class="section-sub">
-      Entrambe le piattaforme girano su una VPS con Docker,
-      database MySQL condiviso e certificato SSL. Architettura scalabile
-      e manutenibile dal primo giorno.
-    </p>
-    <div class="tech-pills">
-      <span class="pill">☕ Spring Boot 3 (Java 21)</span>
-      <span class="pill">⚛️ React 19 + Vite</span>
-      <span class="pill">🐬 MySQL 8</span>
-      <span class="pill">🐳 Docker Compose</span>
-      <span class="pill">🔐 JWT Authentication</span>
-      <span class="pill">💳 PayPal Integration</span>
-      <span class="pill">🔄 WebSocket / STOMP</span>
-      <span class="pill">📱 QR Code Scanner</span>
-      <span class="pill">🌍 i18n (IT / EN)</span>
-      <span class="pill">🔒 HTTPS / Let's Encrypt</span>
-      <span class="pill">🔁 Nginx Reverse Proxy</span>
-      <span class="pill">📦 Maven Build</span>
+    <div class="section-header">
+      <span class="section-label">Guarda il Video</span>
+      <h2 class="section-title">Scopri Come Funziona</h2>
+      <p class="section-sub">
+        Un&apos;anteprima della tua prossima estate perfetta. 
+        Guarda quanto e semplice prenotare e ordinare dalla spiaggia.
+      </p>
+    </div>
+
+    <div class="video-wrapper">
+      <div class="video-thumbnail" id="videoThumbnail">
+        <img src="/images/beach-lifestyle.jpg" alt="Video anteprima" />
+        <div class="video-thumbnail-overlay">
+          <div class="play-button">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="video-frame" id="videoFrame">
+        <!-- Video placeholder - sostituire con il video reale -->
+        <iframe src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── EXPERIENCE SECTION ─────────────────────────────────────── -->
+<section class="experience-section" id="scopri">
+  <div class="container">
+    <div class="experience-grid">
+      <div class="experience-image">
+        <img src="/images/beach-experience.jpg" alt="Esperienza in spiaggia" />
+      </div>
+      <div class="experience-content">
+        <span class="section-label">Perche Sceglierci</span>
+        <h2>Un&apos;Estate Senza Stress, Solo Relax</h2>
+        <p>
+          Dimentica le lunghe attese e le code sotto il sole. 
+          Con Beach Platform, ogni momento in spiaggia diventa speciale. 
+          Il tuo posto e sempre pronto, il tuo drink sempre fresco.
+        </p>
+        <ul class="experience-list">
+          <li>
+            <span class="experience-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+            <span>Prenota dal divano di casa e trova tutto pronto al tuo arrivo</span>
+          </li>
+          <li>
+            <span class="experience-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+            <span>Ordina cibo e bevande senza alzarti dal lettino</span>
+          </li>
+          <li>
+            <span class="experience-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+            <span>Paga in modo sicuro direttamente online</span>
+          </li>
+          <li>
+            <span class="experience-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+            <span>Goditi ogni momento della tua vacanza al 100%</span>
+          </li>
+        </ul>
+        <a href="https://booking.80-211-137-54.sslip.io" class="btn btn-primary" target="_blank">
+          Inizia Ora
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ───────────────────────────────────────────── -->
+<section class="testimonials-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Testimonianze</span>
+      <h2 class="section-title">Cosa Dicono i Nostri Clienti</h2>
+      <p class="section-sub">
+        Migliaia di famiglie hanno gia scelto Beach Platform per le loro vacanze
+      </p>
+    </div>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-quote">"</div>
+        <p class="testimonial-text">
+          Finalmente posso prenotare il mio ombrellone preferito senza alzarmi alle 6 del mattino! 
+          E il servizio delivery? Fantastico, il pranzo arriva mentre mi godo il sole.
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">MR</div>
+          <div class="testimonial-info">
+            <h4>Marco Rossi</h4>
+            <p>Roma</p>
+            <div class="testimonial-stars">
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-quote">"</div>
+        <p class="testimonial-text">
+          Con due bambini piccoli, non dovermi preoccupare del posto in spiaggia 
+          e una benedizione. Tutto organizzato in anticipo, vacanza perfetta!
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">GB</div>
+          <div class="testimonial-info">
+            <h4>Giulia Bianchi</h4>
+            <p>Milano</p>
+            <div class="testimonial-stars">
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-quote">"</div>
+        <p class="testimonial-text">
+          Il QR code per ordinare e geniale! Niente piu attese al bar sotto il sole. 
+          Scansiono, ordino, e in 10 minuti ho il mio spritz fresco. Top!
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">LV</div>
+          <div class="testimonial-info">
+            <h4>Luca Verdi</h4>
+            <p>Napoli</p>
+            <div class="testimonial-stars">
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -677,59 +1152,129 @@
 <!-- ── CTA SECTION ────────────────────────────────────────────── -->
 <section class="cta-section">
   <div class="container">
-    <span class="section-label">Inizia adesso</span>
-    <h2 class="section-title">Pronto per la stagione?</h2>
-    <p class="section-sub">
-      Scegli la piattaforma che fa per te oppure usale entrambe
-      per gestire prenotazioni e ristorazione dallo stesso stabilimento.
-    </p>
-    <div class="cta-btns">
-      <a href="https://booking.80-211-137-54.sslip.io" class="btn btn-cta-booking" target="_blank">
-        ⛱ Apri BeachBooking
-      </a>
-      <a href="https://delivery.80-211-137-54.sslip.io" class="btn btn-cta-delivery" target="_blank">
-        🍹 Apri BeachDelivery
-      </a>
+    <div class="cta-content">
+      <h2>Pronto per l&apos;Estate dei Tuoi Sogni?</h2>
+      <p>
+        Non perdere piu tempo in code e attese. Prenota il tuo ombrellone 
+        e inizia a goderti la tua vacanza dal primo istante.
+      </p>
+      <div class="cta-buttons">
+        <a href="https://booking.80-211-137-54.sslip.io" class="btn btn-cta btn-cta-primary" target="_blank">
+          Prenota il Tuo Ombrellone
+        </a>
+        <a href="https://delivery.80-211-137-54.sslip.io" class="btn btn-cta btn-cta-secondary" target="_blank">
+          Scopri il Menu
+        </a>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- ── FOOTER ─────────────────────────────────────────────────── -->
 <footer>
-  <strong>Beach Platform</strong> — La tua estate digitale
-  <div class="footer-links">
-    <a href="https://booking.80-211-137-54.sslip.io" target="_blank">BeachBooking</a>
-    <a href="https://delivery.80-211-137-54.sslip.io" target="_blank">BeachDelivery</a>
-    <a href="https://api-delivery.80-211-137-54.sslip.io/swagger-ui.html" target="_blank">API Docs</a>
+  <div class="footer-content">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="text-decoration:none;">
+        <div class="logo-mark">
+          <svg class="logo-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 3C8.5 3 4 7.5 4 12H14H24C24 7.5 19.5 3 14 3Z" fill="white" opacity=".95"/>
+            <rect x="13.25" y="12" width="1.5" height="11" rx=".75" fill="white" opacity=".95"/>
+            <path d="M13.25 23 Q10.5 25.5 12.5 26 Q14.5 26.5 14.75 23" fill="white" opacity=".8"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span>Beach</span>
+        </div>
+      </a>
+      <p>
+        La piattaforma digitale per vivere la spiaggia senza pensieri. 
+        Prenota, ordina, rilassati.
+      </p>
+    </div>
+    <div class="footer-column">
+      <h4>Servizi</h4>
+      <ul>
+        <li><a href="https://booking.80-211-137-54.sslip.io" target="_blank">Prenotazioni</a></li>
+        <li><a href="https://delivery.80-211-137-54.sslip.io" target="_blank">Food & Delivery</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h4>Azienda</h4>
+      <ul>
+        <li><a href="#">Chi Siamo</a></li>
+        <li><a href="#">Contatti</a></li>
+        <li><a href="#">Lavora con Noi</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h4>Supporto</h4>
+      <ul>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Termini di Servizio</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Beach Platform. Tutti i diritti riservati.</p>
+    <div class="footer-social">
+      <a href="#" aria-label="Instagram">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+        </svg>
+      </a>
+      <a href="#" aria-label="Facebook">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+        </svg>
+      </a>
+      <a href="#" aria-label="Twitter">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+        </svg>
+      </a>
+    </div>
   </div>
 </footer>
 
 <script>
-  // ── Floating bubbles ────────────────────────────────────────
-  const container = document.getElementById('bubbles');
-  for (let i = 0; i < 18; i++) {
-    const b = document.createElement('div');
-    b.className = 'bubble';
-    const size = Math.random() * 60 + 20;
-    b.style.cssText = `
-      width:${size}px; height:${size}px;
-      left:${Math.random()*100}%;
-      animation-duration:${Math.random()*12+8}s;
-      animation-delay:-${Math.random()*12}s;
-    `;
-    container.appendChild(b);
-  }
+  // Navbar scroll effect
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+  });
 
-  // ── How-it-works tabs ───────────────────────────────────────
-  document.querySelectorAll('.how-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.how-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.how-content').forEach(c => c.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  // Video play functionality
+  const videoThumbnail = document.getElementById('videoThumbnail');
+  const videoFrame = document.getElementById('videoFrame');
+  
+  videoThumbnail.addEventListener('click', () => {
+    // Sostituire con il link del video reale
+    const videoUrl = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1';
+    videoFrame.querySelector('iframe').src = videoUrl;
+    videoThumbnail.style.display = 'none';
+    videoFrame.classList.add('active');
+  });
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   });
 </script>
+
+<!-- PWA Scripts -->
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').then((reg) => {
@@ -740,24 +1285,22 @@
             const banner = document.createElement('div');
             banner.innerHTML = `
               <div id="pwa-banner" style="position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:9999;
-                background:#0077b6;color:#fff;padding:.75rem 1.25rem;border-radius:12px;
+                background:var(--ocean);color:#fff;padding:.75rem 1.25rem;border-radius:12px;
                 box-shadow:0 4px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:.75rem;font-family:Inter,sans-serif;font-size:.875rem">
-                <span>🔄 Nuova versione disponibile!</span>
+                <span>Nuova versione disponibile!</span>
                 <button onclick="navigator.serviceWorker.controller&&navigator.serviceWorker.controller.postMessage({type:'SKIP_WAITING'});window.location.reload()"
-                  style="background:#fff;color:#0077b6;border:none;border-radius:8px;padding:.25rem .75rem;font-weight:600;cursor:pointer">Aggiorna</button>
+                  style="background:#fff;color:var(--ocean);border:none;border-radius:8px;padding:.25rem .75rem;font-weight:600;cursor:pointer">Aggiorna</button>
                 <button onclick="document.getElementById('pwa-banner').remove()"
-                  style="background:none;border:none;color:rgba(255,255,255,.7);font-size:1.25rem;cursor:pointer;line-height:1">×</button>
+                  style="background:none;border:none;color:rgba(255,255,255,.7);font-size:1.25rem;cursor:pointer;line-height:1">x</button>
               </div>`;
             document.body.appendChild(banner.firstElementChild);
           }
         });
       });
-      // Controlla aggiornamenti ogni ora
       setInterval(() => reg.update(), 60 * 60 * 1000);
     });
   }
 
-  // Cattura l'evento di installazione PWA e mostra un bottone custom
   let _installPrompt = null;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -777,13 +1320,14 @@
     }
   }
 </script>
-<!-- Bottone installazione PWA (visibile solo quando il browser supporta l'install prompt) -->
+
 <div id="pwa-install-btn" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;z-index:9998;
-  background:#0077b6;color:#fff;padding:.75rem 1.25rem;border-radius:50px;
-  box-shadow:0 4px 20px rgba(0,119,182,.4);align-items:center;gap:.5rem;
+  background:var(--coral);color:#fff;padding:.75rem 1.25rem;border-radius:50px;
+  box-shadow:0 4px 20px rgba(224,122,95,.4);align-items:center;gap:.5rem;
   font-family:Inter,sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;border:none;"
   onclick="installPWA()">
-  📲 Installa l'app
+  Installa l&apos;app
 </div>
+
 </body>
 </html>
